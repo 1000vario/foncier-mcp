@@ -14,10 +14,11 @@ key and no GitHub secret: the image is public on GitHub Packages and Scaleway pu
 
 ## Before the first run
 
-1. Make the package public once. GitHub publishes a personal account's packages as private by
-   default. Open the package `foncier-mcp` under your GitHub profile, Package settings, Danger
-   Zone, Change visibility, Public. `deploy.ps1` checks this with an anonymous pull token and
-   stops if the image is not public.
+1. Check that the package is public. On 2026-10-11 the image was publicly pullable right after
+   the first workflow run, without any manual change: the package is linked to this public
+   repository. If a later check fails, open the package `foncier-mcp` under your GitHub profile,
+   Package settings, Danger Zone, Change visibility, Public. `deploy.ps1` checks this with an
+   anonymous pull token and stops if the image is not public.
 2. Create a Scaleway IAM application dedicated to this deployment (for instance
    `foncier-mcp-deploy`), attach a policy with `ContainersFullAccess` scoped to the project that
    will host the container, generate an API key for it. Keep the project ID at hand.
