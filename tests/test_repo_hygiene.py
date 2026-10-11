@@ -14,7 +14,7 @@ SKIP_PARTS = {
     "dist",
     "node_modules",
 }
-EXTENSIONS = {".py", ".md", ".toml", ".yml", ".yaml", ".json", ".txt", ".cfg", ""}
+EXTENSIONS = {".py", ".md", ".toml", ".yml", ".yaml", ".json", ".txt", ".cfg", ".ps1", ""}
 
 
 def iter_text_files():

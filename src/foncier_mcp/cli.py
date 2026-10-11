@@ -68,6 +68,9 @@ def build_parser() -> argparse.ArgumentParser:
     keys_sub.add_parser("list", help="list issued keys (ids only, never the keys)")
     revoke = keys_sub.add_parser("revoke", help="revoke a key by its id")
     revoke.add_argument("key_id")
+    keys_sub.add_parser(
+        "export", help="print the store as compact JSON (hashes only) for FONCIER_MCP_KEYS_JSON"
+    )
     return parser
 
 
@@ -105,7 +108,7 @@ def _cmd_call(settings: Settings, args: argparse.Namespace) -> int:
 
 
 def _cmd_keys(settings: Settings, args: argparse.Namespace) -> int:
-    store = KeyStore(settings.keys_file)
+    store = KeyStore(settings.keys_file, inline=settings.keys_json)
     tiers = tiers_for(settings)
     if args.keys_command == "issue":
         try:
@@ -130,11 +133,20 @@ def _cmd_keys(settings: Settings, args: argparse.Namespace) -> int:
             print(f"{key.id}\t{key.tier}\t{state}\t{key.created_at}\t{key.email}")
         return 0
     if args.keys_command == "revoke":
-        if store.revoke(args.key_id):
+        try:
+            revoked = store.revoke(args.key_id)
+        except FoncierError as exc:
+            print(f"{exc.code}: {exc.message}", file=sys.stderr)
+            return 1
+        if revoked:
             print(f"key {args.key_id} revoked", file=sys.stderr)
             return 0
         print(f"no active key with id {args.key_id}", file=sys.stderr)
         return 1
+    if args.keys_command == "export":
+        print(store.export())
+        print(f"{len(store.list())} key records exported, hashes only", file=sys.stderr)
+        return 0
     return 2
 
 

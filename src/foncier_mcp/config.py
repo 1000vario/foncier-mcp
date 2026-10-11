@@ -28,6 +28,11 @@ def _env_path(name: str, default: str) -> Path:
     return Path(os.path.expanduser(os.environ.get(name) or default))
 
 
+def _env_text(name: str) -> str | None:
+    raw = (os.environ.get(name) or "").strip()
+    return raw or None
+
+
 def _env_list(name: str) -> tuple[str, ...]:
     raw = os.environ.get(name) or ""
     return tuple(item.strip() for item in raw.split(",") if item.strip())
@@ -45,6 +50,7 @@ class Settings:
     paid_daily_quota: int
     paid_tier_enabled: bool
     allowed_hosts: tuple[str, ...] = ()
+    keys_json: str | None = None
     timeout_seconds: float = 30.0
     user_agent: str = "foncier-mcp/0.1 (+https://github.com/1000vario/foncier-mcp)"
 
@@ -61,4 +67,5 @@ class Settings:
             paid_daily_quota=_env_int("FONCIER_MCP_PAID_DAILY_QUOTA", 5000),
             paid_tier_enabled=_env_bool("PAID_TIER_ENABLED", False),
             allowed_hosts=_env_list("FONCIER_MCP_ALLOWED_HOSTS"),
+            keys_json=_env_text("FONCIER_MCP_KEYS_JSON"),
         )

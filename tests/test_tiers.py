@@ -1,5 +1,6 @@
 import pytest
 
+from foncier_mcp.config import Settings
 from foncier_mcp.errors import FeatureDisabled, InvalidInput, QuotaExceeded, Unauthorized
 from foncier_mcp.tiers import KeyStore, QuotaGuard, UsageCounter, tiers_for
 from helpers import make_settings
@@ -79,3 +80,48 @@ def test_paid_key_downgraded_when_flag_off(tmp_path):
     access = guard_off.check({"x-api-key": plain})
     assert access.tier == "free" and access.downgraded
     assert not guard_off.feature_allowed(access, "pdf_export")
+
+
+def test_inline_store_is_read_only(settings):
+    store = KeyStore(settings.keys_file)
+    tiers = tiers_for(settings)
+    plain, record = store.issue("a@b.cd", "free", tiers)
+    exported = store.export()
+    assert plain not in exported and "\n" not in exported
+    inline = KeyStore(settings.keys_file.with_name("absent.json"), inline=exported)
+    assert inline.read_only
+    found = inline.lookup(plain)
+    assert found is not None and found.id == record.id and found.active
+    with pytest.raises(InvalidInput):
+        inline.issue("c@d.ef", "free", tiers)
+    with pytest.raises(InvalidInput):
+        inline.revoke(record.id)
+    assert [k.id for k in inline.list()] == [record.id]
+    assert inline.export() == exported
+
+
+def test_inline_store_rejects_bad_json(tmp_path):
+    with pytest.raises(InvalidInput):
+        KeyStore(tmp_path / "keys.json", inline="{not json")
+    with pytest.raises(InvalidInput):
+        KeyStore(tmp_path / "keys.json", inline='{"keys": [1, 2]}')
+    assert not KeyStore(tmp_path / "keys.json", inline="   ").read_only
+
+
+def test_guard_uses_inline_keys(tmp_path):
+    seed = make_settings(tmp_path)
+    plain, _ = KeyStore(seed.keys_file).issue("a@b.cd", "free", tiers_for(seed))
+    exported = KeyStore(seed.keys_file).export()
+    hosted = make_settings(tmp_path / "hosted", keys_json=exported)
+    guard = QuotaGuard(hosted)
+    assert guard.keys.read_only
+    assert guard.check({"x-api-key": plain}).tier == "free"
+    with pytest.raises(Unauthorized):
+        guard.check({"x-api-key": "fm_unknown"})
+
+
+def test_settings_read_keys_json_from_env(monkeypatch):
+    monkeypatch.setenv("FONCIER_MCP_KEYS_JSON", ' {"keys": {}} ')
+    assert Settings.from_env().keys_json == '{"keys": {}}'
+    monkeypatch.setenv("FONCIER_MCP_KEYS_JSON", "")
+    assert Settings.from_env().keys_json is None

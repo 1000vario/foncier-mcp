@@ -6,7 +6,8 @@ PAID_TIER_ENABLED flag. No payment code exists in this release. On stdio there a
 headers, so no key is required: the local user already owns the process.
 
 Keys are stored hashed (sha256) in a JSON file; the usage counter is a JSON file reset at the
-first call of each UTC day. Both files live outside the repository.
+first call of each UTC day. Both files live outside the repository. A host without a disk gets
+its keys read-only from FONCIER_MCP_KEYS_JSON, the output of `foncier-mcp keys export`.
 """
 
 from __future__ import annotations
@@ -95,18 +96,41 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 class KeyStore:
-    def __init__(self, path: Path) -> None:
+    """Hashed keys in a JSON file, or read-only from an inline JSON document (hosted mode)."""
+
+    def __init__(self, path: Path, inline: str | None = None) -> None:
         self.path = Path(path)
         self._lock = threading.Lock()
+        self._inline: dict[str, dict[str, Any]] | None = None
+        if inline and inline.strip():
+            self._inline = _parse_inline(inline)
+
+    @property
+    def read_only(self) -> bool:
+        return self._inline is not None
 
     def _load(self) -> dict[str, dict[str, Any]]:
+        if self._inline is not None:
+            return dict(self._inline)
         return dict(_read_json(self.path).get("keys") or {})
 
     def _save(self, keys: dict[str, dict[str, Any]]) -> None:
         _write_json(self.path, {"keys": keys})
 
+    def _require_writable(self) -> None:
+        if self.read_only:
+            raise InvalidInput(
+                "the key store is read-only (FONCIER_MCP_KEYS_JSON is set); "
+                "issue or revoke on the file store, then export and redeploy"
+            )
+
+    def export(self) -> str:
+        """Compact JSON of the store, hashes and emails only, for FONCIER_MCP_KEYS_JSON."""
+        return json.dumps({"keys": self._load()}, separators=(",", ":"), sort_keys=True)
+
     def issue(self, email: str, tier: str, tiers: dict[str, Tier]) -> tuple[str, ApiKey]:
         """Create a key and return (plain key, record). The plain key is shown only once."""
+        self._require_writable()
         email = (email or "").strip().lower()
         if "@" not in email or len(email) < 5:
             raise InvalidInput("email must be a valid address")
@@ -138,6 +162,7 @@ class KeyStore:
         return sorted((ApiKey(**r) for r in self._load().values()), key=lambda k: k.created_at)
 
     def revoke(self, key_id: str) -> bool:
+        self._require_writable()
         with self._lock:
             keys = self._load()
             hit = False
@@ -148,6 +173,17 @@ class KeyStore:
             if hit:
                 self._save(keys)
         return hit
+
+
+def _parse_inline(text: str) -> dict[str, dict[str, Any]]:
+    try:
+        data = json.loads(text)
+    except ValueError as exc:
+        raise InvalidInput(f"FONCIER_MCP_KEYS_JSON is not valid JSON: {exc}") from exc
+    keys = data.get("keys", data) if isinstance(data, dict) else None
+    if not isinstance(keys, dict) or not all(isinstance(v, dict) for v in keys.values()):
+        raise InvalidInput("FONCIER_MCP_KEYS_JSON must be the output of `foncier-mcp keys export`")
+    return dict(keys)
 
 
 class UsageCounter:
@@ -182,7 +218,7 @@ class QuotaGuard:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.tiers = tiers_for(settings)
-        self.keys = KeyStore(Path(settings.keys_file))
+        self.keys = KeyStore(Path(settings.keys_file), inline=settings.keys_json)
         self.usage = UsageCounter(Path(settings.usage_file))
 
     def check(self, headers: Mapping[str, str] | None) -> Access:

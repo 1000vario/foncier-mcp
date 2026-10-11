@@ -134,6 +134,9 @@ args = ["--from", "git+https://github.com/1000vario/foncier-mcp", "foncier-mcp"]
 Endpoint `https://HOST/mcp`, JSON responses, stateless. Send the key in the `x-api-key` header.
 `GET /health` answers without a key.
 
+The hosted instance is `https://foncier.guillaume-couillard.com/mcp`; its `/health` says whether
+it is up. The free key is sent by email by hand, see [Keys](#keys).
+
 ## Data sources
 
 All sources were read on 2026-10-11, including their documentation pages. The dates, limits and
@@ -240,10 +243,16 @@ quota: the counter only applies to HTTP requests.
 foncier-mcp keys issue --email someone@example.org        # prints the key once
 foncier-mcp keys list
 foncier-mcp keys revoke fm_abcdefgh
+foncier-mcp keys export > keys-export.json                # hashes only, for FONCIER_MCP_KEYS_JSON
 ```
 
 Keys are stored hashed (SHA-256) in `FONCIER_MCP_KEYS_FILE`; daily usage in
 `FONCIER_MCP_USAGE_FILE`, reset at UTC midnight. The free key is sent by email by hand today.
+
+A host without a persistent disk gets its keys through `FONCIER_MCP_KEYS_JSON`, the output of
+`keys export` placed in a secret environment variable. The store is then read-only: `issue` and
+`revoke` refuse, and a revocation is an export followed by a redeploy. The export holds hashes
+and emails, never a key.
 
 ## Running the HTTP server
 
@@ -260,6 +269,7 @@ Environment (see [.env.example](.env.example)):
 | `FONCIER_MCP_OFFLINE` | `0` | `1` answers from the cache only |
 | `FONCIER_MCP_REQUIRE_API_KEY` | `1` | HTTP requests need a key; stdio never does |
 | `FONCIER_MCP_KEYS_FILE`, `FONCIER_MCP_USAGE_FILE` | `~/.config/foncier-mcp/...` | key and usage stores |
+| `FONCIER_MCP_KEYS_JSON` | empty | output of `keys export` for a host without a disk; when set the key store is read-only and `FONCIER_MCP_KEYS_FILE` is ignored |
 | `FONCIER_MCP_FREE_DAILY_QUOTA` | `200` | free tier quota |
 | `PAID_TIER_ENABLED` | `false` | paid tier switch, see above |
 | `FONCIER_MCP_ALLOWED_HOSTS` | empty | comma-separated hosts for DNS-rebinding protection; empty accepts any host, which a deployment behind a proxy needs |
@@ -286,16 +296,55 @@ excluding VAT, Paris region:
 | Scaleway Instance DEV1-S | about 6.55 EUR | comfortable for the container plus its cache |
 | Scaleway Instance PLAY2-PICO | about 10.42 EUR | alternative with newer hardware |
 
-Procedure for Serverless Containers: push the image to the Scaleway container registry, create a
-container with the image, port 8080, 256 MB memory, minimum scale 0, set the variables above
-(`FONCIER_MCP_REQUIRE_API_KEY=1`, `PAID_TIER_ENABLED=false`, and a mounted or object-storage
-backed `/data`, otherwise keys and usage reset on each cold start), then point a subdomain at the
-container endpoint. The account, the payment method and the subdomain belong to the author and
-are not created by this repository or by any script in it.
+Chosen: Serverless Containers in fr-par, 256 MB, one instance at most, scale to zero, behind
+`foncier.guillaume-couillard.com`. Worst case if someone keeps the single instance busy all month
+(31 days, 256 MB, 140 mvCPU set explicitly because Scaleway's default when the client sets
+nothing is 1000 mvCPU): about 2.3 EUR. The account, the payment method and the
+subdomain belong to the author.
+
+### Deployment
+
+The image is built by [publish-image.yml](.github/workflows/publish-image.yml) after a green CI
+run on `main` and pushed to `ghcr.io/1000vario/foncier-mcp:latest` (linux/amd64, public).
+Scaleway pulls it from there: no Scaleway registry, no Scaleway secret in GitHub.
+
+The author deploys from a Windows terminal with the scripts in [deploy/scaleway](deploy/scaleway):
+
+```powershell
+.\deploy\scaleway\install-credentials.ps1 -Provider scaleway     # asks for the key, stores it encrypted (DPAPI)
+.\deploy\scaleway\install-credentials.ps1 -Provider cloudflare   # optional, lets the script create the CNAME
+foncier-mcp keys export > keys-export.json
+.\deploy\scaleway\deploy.ps1 -KeysJsonPath .\keys-export.json
+```
+
+`deploy.ps1` creates or updates the namespace and the container (port 8080, 256 MB, 140 mvCPU,
+min 0, max 1, public, `FONCIER_MCP_REQUIRE_API_KEY=1`, `PAID_TIER_ENABLED=false`,
+`FONCIER_MCP_KEYS_JSON` as a secret variable; `FONCIER_MCP_ALLOWED_HOSTS` stays empty because DNS
+rebinding protection guards local servers, not a public endpoint behind the provider's proxy),
+waits for `ready`, checks `/health` on the Scaleway endpoint, makes sure the CNAME
+`foncier.guillaume-couillard.com` points at that endpoint without proxy so that the HTTP-01
+challenge reaches Scaleway, registers the custom domain and waits for its certificate. It prints
+identifiers and statuses, never a key. The same steps by hand in the Scaleway console are in
+[deploy/scaleway/README.md](deploy/scaleway/README.md).
+
+What this hosting does not give:
+
+- No persistent disk. The cache and the usage counter live in the instance and vanish when it
+  scales to zero after about fifteen minutes without a request. The daily quota is therefore
+  enforced per warm instance: an upper bound on cost and abuse, not an exact daily count per key.
+  A durable counter would need Object Storage (Standard One Zone 0.00803 EUR per GB per month,
+  Multi-AZ 0.01606 EUR, read on 2026-10-11, no free storage allowance) and code that does not
+  exist yet.
+- Keys are read-only in the container. Issuing or revoking one is `keys issue` or `keys revoke`
+  on the author's machine, then `keys export` and `deploy.ps1` again.
+- Requests reach the public APIs from Scaleway's addresses with the per-host rate limiting of the
+  server; every caller shares it.
 
 ## Security
 
 - No secret in the repository. Keys are hashed at rest. `.env` files are ignored.
+- The deployment scripts keep the provider keys encrypted with Windows DPAPI under the author's
+  profile, call the provider APIs over TLS and print statuses and identifiers only.
 - Before every push, the author runs a secret scan outside CI (`brain scan-secrets --repo`, a
   local tool); CI runs lint, tests and the offline evals.
 - The server is read-only towards its sources and sends them nothing but the lookup parameters.
