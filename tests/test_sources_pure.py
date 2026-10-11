@@ -148,3 +148,59 @@ def test_rows_for_parcel_and_within():
     assert len(dvf.rows_for_parcel(rows, "34172000AB0001")) == 1
     near = dvf.rows_within(rows, 3.88, 43.61, 100)
     assert len(near) == 1 and near[0][1] < 1
+
+
+def _square_around(lon, lat, half_m):
+    import json
+
+    return json.loads(cadastre.square_geojson(lon, lat, half_m))
+
+
+def test_square_geojson_is_closed_and_sized():
+    ring = _square_around(3.0, 45.0, 10.0)["coordinates"][0]
+    assert len(ring) == 5 and ring[0] == ring[-1]
+    assert abs((ring[2][1] - ring[0][1]) * cadastre.METERS_PER_DEGREE - 20.0) < 0.01
+
+
+def test_distance_to_boundary_and_nearest():
+    cos45 = 0.70710678
+    west = _square_around(3.0, 45.0, 10.0)
+    east = _square_around(3.0 + 40.0 / (cadastre.METERS_PER_DEGREE * cos45), 45.0, 10.0)
+    # A point 5 m east of the west square, 15 m west of the east square.
+    lon = 3.0 + 15.0 / (cadastre.METERS_PER_DEGREE * cos45)
+    d_west = cadastre.distance_to_boundary_m(west, lon, 45.0)
+    d_east = cadastre.distance_to_boundary_m(east, lon, 45.0)
+    assert abs(d_west - 5.0) < 0.2
+    assert abs(d_east - 15.0) < 0.2
+    features = [
+        {"properties": {"idu": "E"}, "geometry": east},
+        {"properties": {"idu": "W"}, "geometry": west},
+    ]
+    chosen, distance = cadastre.nearest_feature(features, lon, 45.0)
+    assert chosen["properties"]["idu"] == "W"
+    assert abs(distance - 5.0) < 0.2
+    assert cadastre.distance_to_boundary_m(None, lon, 45.0) is None
+    with pytest.raises(ValueError):
+        cadastre.nearest_feature([], lon, 45.0)
+
+
+def test_parcel_params_translate_arrondissements():
+    assert cadastre.arrondissement_parent("75111") == "75056"
+    assert cadastre.arrondissement_parent("69383") == "69123"
+    assert cadastre.arrondissement_parent("13208") == "13055"
+    for other in ("75056", "13200", "13217", "69380", "34172", "2A004"):
+        assert cadastre.arrondissement_parent(other) is None, other
+    params = cadastre.parcel_params("75111000AP0059")
+    assert (params["code_insee"], params["code_arr"]) == ("75056", "111")
+    assert (params["section"], params["numero"], params["com_abs"]) == ("AP", "0059", "000")
+    plain = cadastre.parcel_params("34172000DS0638")
+    assert plain["code_insee"] == "34172" and "code_arr" not in plain
+
+
+def test_feature_to_parcel_keeps_the_arrondissement_insee():
+    feature = {
+        "properties": {"idu": "75111000AP0059", "code_insee": "75056", "nom_com": "Paris"},
+        "geometry": None,
+    }
+    parcel = cadastre.feature_to_parcel(feature)
+    assert parcel["code_insee"] == "75111" and parcel["id"] == "75111000AP0059"

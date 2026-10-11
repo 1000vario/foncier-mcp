@@ -15,6 +15,7 @@ from typing import Any
 
 from ..errors import FoncierError
 from ..http import Fetcher, FetchResult
+from .cadastre import arrondissement_parent
 
 SOURCE = "georisques"
 BASE = "https://georisques.gouv.fr/api/v1"
@@ -48,12 +49,30 @@ async def _call(
         return None, None, exc
 
 
+def _has_items(data: Any) -> bool:
+    items = data.get("data") if isinstance(data, dict) else None
+    return isinstance(items, list) and len(items) > 0
+
+
 async def by_commune(fetcher: Fetcher, insee: str) -> dict[str, dict[str, Any]]:
+    """Commune-level endpoints, keyed by field; each entry says which INSEE code answered.
+
+    Georisques knows the Paris arrondissement codes but not those of Lyon and Marseille
+    (read on 2026-10-11): an empty answer for an arrondissement code is asked again for
+    the parent commune, whose data applies to every arrondissement.
+    """
     out: dict[str, dict[str, Any]] = {}
+    parent = arrondissement_parent(insee)
     for key, spec in COMMUNE_ENDPOINTS.items():
         params = {"code_insee": insee, **spec["params"]}
         data, result, error = await _call(fetcher, spec["path"], params)
-        out[key] = {"data": data, "result": result, "error": error}
+        used = insee
+        if parent is not None and error is None and not _has_items(data):
+            retry = await _call(fetcher, spec["path"], {**params, "code_insee": parent})
+            if retry[2] is None and _has_items(retry[0]):
+                data, result, _ = retry
+                used = parent
+        out[key] = {"data": data, "result": result, "error": error, "insee": used}
     return out
 
 

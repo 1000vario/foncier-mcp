@@ -7,6 +7,7 @@ Answers are GeoJSON FeatureCollections, limited to 1000 features per call.
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any
 
@@ -17,7 +18,25 @@ SOURCE = "apicarto_cadastre"
 BASE = "https://apicarto.ign.fr/api/cadastre"
 
 # INSEE (5 chars, Corsica uses 2A/2B) + absorbed commune (3) + section (2) + number (4) = 14.
+# Half-side of the square searched when a geocoded point falls outside every parcel.
+NEAR_METERS = 10.0
+METERS_PER_DEGREE = 111_320.0
+
 PARCEL_ID_RE = re.compile(r"^(\d[0-9AB]\d{3})(\d{3})([0-9A-Z]{2})(\d{4})$")
+
+# Paris, Lyon and Marseille: API Carto keys their parcels by the parent commune in
+# code_insee (75056, 69123, 13055) plus a three-digit code_arr (111, 383, 208), while the
+# idu keeps the arrondissement INSEE code (75111000AP0059). Read on 2026-10-11.
+ARRONDISSEMENTS = {"751": ("75056", 1, 20), "693": ("69123", 81, 89), "132": ("13055", 1, 16)}
+
+
+def arrondissement_parent(insee: str) -> str | None:
+    """Parent commune of an arrondissement INSEE code, None for any other commune."""
+    entry = ARRONDISSEMENTS.get(insee[:3])
+    if entry is None or not insee[3:].isdigit():
+        return None
+    parent, low, high = entry
+    return parent if low <= int(insee[3:]) <= high else None
 
 
 def parse_parcel_id(parcel_id: str) -> dict[str, str]:
@@ -52,20 +71,55 @@ async def parcels_at_point(
     return list(data.get("features") or []), result
 
 
-async def parcel_by_id(
-    fetcher: Fetcher, parcel_id: str
+def square_geojson(lon: float, lat: float, meters: float) -> str:
+    """Square of half-side `meters` around the point, as a GeoJSON Polygon."""
+    dlat = meters / METERS_PER_DEGREE
+    dlon = meters / (METERS_PER_DEGREE * max(math.cos(math.radians(lat)), 1e-6))
+    corners = [
+        (lon - dlon, lat - dlat),
+        (lon + dlon, lat - dlat),
+        (lon + dlon, lat + dlat),
+        (lon - dlon, lat + dlat),
+        (lon - dlon, lat - dlat),
+    ]
+    ring = [[round(x, 7), round(y, 7)] for x, y in corners]
+    return json.dumps({"type": "Polygon", "coordinates": [ring]}, separators=(",", ":"))
+
+
+async def parcels_near_point(
+    fetcher: Fetcher, lon: float, lat: float, meters: float = NEAR_METERS
 ) -> tuple[list[dict[str, Any]], FetchResult]:
-    parts = parse_parcel_id(parcel_id)
+    """Parcels intersecting a small square around the point, for points on the road."""
     data, result = await fetcher.get_json(
         f"{BASE}/parcelle",
         source=SOURCE,
-        params={
-            "code_insee": parts["code_insee"],
-            "com_abs": parts["com_abs"],
-            "section": parts["section"],
-            "numero": parts["numero"],
-            "_limit": 5,
-        },
+        params={"geom": square_geojson(lon, lat, meters), "_limit": 20},
+    )
+    return list(data.get("features") or []), result
+
+
+def parcel_params(parcel_id: str) -> dict[str, str | int]:
+    """API Carto query for one parcel id, with the arrondissement translation."""
+    parts = parse_parcel_id(parcel_id)
+    params: dict[str, str | int] = {
+        "code_insee": parts["code_insee"],
+        "com_abs": parts["com_abs"],
+        "section": parts["section"],
+        "numero": parts["numero"],
+        "_limit": 5,
+    }
+    parent = arrondissement_parent(parts["code_insee"])
+    if parent is not None:
+        params["code_insee"] = parent
+        params["code_arr"] = parts["code_insee"][2:]
+    return params
+
+
+async def parcel_by_id(
+    fetcher: Fetcher, parcel_id: str
+) -> tuple[list[dict[str, Any]], FetchResult]:
+    data, result = await fetcher.get_json(
+        f"{BASE}/parcelle", source=SOURCE, params=parcel_params(parcel_id)
     )
     return list(data.get("features") or []), result
 
@@ -87,6 +141,59 @@ def _ring_centroid(ring: list[list[float]]) -> tuple[float, float, float]:
         ys = [p[1] for p in ring]
         return 0.0, sum(xs) / len(xs), sum(ys) / len(ys)
     return abs(area2) / 2, cx / (3 * area2), cy / (3 * area2)
+
+
+def _rings(geometry: dict[str, Any]) -> list[list[list[float]]]:
+    gtype = geometry.get("type")
+    coords = geometry.get("coordinates") or []
+    if gtype == "MultiPolygon":
+        polygons = coords
+    elif gtype == "Polygon":
+        polygons = [coords]
+    else:
+        polygons = []
+    return [ring for poly in polygons for ring in poly]
+
+
+def distance_to_boundary_m(geometry: dict[str, Any] | None, lon: float, lat: float) -> float | None:
+    """Shortest distance in metres from the point to the boundary of the geometry.
+
+    Local equirectangular approximation: exact enough for a few metres around a parcel.
+    """
+    if not geometry:
+        return None
+    ky = METERS_PER_DEGREE
+    kx = METERS_PER_DEGREE * max(math.cos(math.radians(lat)), 1e-6)
+    qx, qy = lon * kx, lat * ky
+    best: float | None = None
+    for ring in _rings(geometry):
+        for i in range(len(ring) - 1):
+            ax, ay = ring[i][0] * kx, ring[i][1] * ky
+            bx, by = ring[i + 1][0] * kx, ring[i + 1][1] * ky
+            dx, dy = bx - ax, by - ay
+            if dx == 0 and dy == 0:
+                d = math.hypot(qx - ax, qy - ay)
+            else:
+                t = ((qx - ax) * dx + (qy - ay) * dy) / (dx * dx + dy * dy)
+                t = max(0.0, min(1.0, t))
+                d = math.hypot(qx - (ax + t * dx), qy - (ay + t * dy))
+            if best is None or d < best:
+                best = d
+    return best
+
+
+def nearest_feature(
+    features: list[dict[str, Any]], lon: float, lat: float
+) -> tuple[dict[str, Any], float | None]:
+    """Feature whose boundary is closest to the point; ties keep the API order."""
+    best: tuple[dict[str, Any], float | None] | None = None
+    for feature in features:
+        d = distance_to_boundary_m(feature.get("geometry"), lon, lat)
+        if best is None or (d is not None and (best[1] is None or d < best[1])):
+            best = (feature, d)
+    if best is None:
+        raise ValueError("nearest_feature needs at least one feature")
+    return best
 
 
 def representative_point(geometry: dict[str, Any] | None) -> tuple[float, float] | None:
@@ -117,9 +224,13 @@ def feature_to_parcel(feature: dict[str, Any]) -> dict[str, Any]:
     props = feature.get("properties") or {}
     geometry = feature.get("geometry")
     center = representative_point(geometry)
+    idu = props.get("idu")
+    # The idu starts with the arrondissement INSEE code where API Carto's code_insee holds
+    # the parent commune; DVF files and the GPU are keyed by the arrondissement code.
+    insee = idu[:5] if isinstance(idu, str) and len(idu) == 14 else props.get("code_insee")
     return {
-        "id": props.get("idu"),
-        "code_insee": props.get("code_insee"),
+        "id": idu,
+        "code_insee": insee,
         "commune": props.get("nom_com"),
         "com_abs": props.get("com_abs"),
         "section": props.get("section"),

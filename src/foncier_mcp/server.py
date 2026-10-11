@@ -47,7 +47,9 @@ DESCRIPTIONS: dict[str, str] = {
     "find_parcel": (
         "Find the cadastral parcel at an address, at a WGS84 point (lon, lat) or by its "
         "14-character identifier. Give exactly one locator. Returns the parcel attributes "
-        "(identifier, commune, section, number, area in m2, centroid) and its GeoJSON geometry."
+        "(identifier, commune, section, number, area in m2, centroid) and its GeoJSON geometry. "
+        "When the geocoded address point falls outside every parcel, typically on the road, "
+        "the nearest parcel within 10 m is returned with a warning naming the candidates."
     ),
     "get_parcel_sales": (
         "Recorded property sales (DVF, years 2021 to 2025 by default) on a parcel located by "

@@ -21,7 +21,7 @@ field is `null` with a written reason. The server never fills a gap with a guess
 | Tool | Input (one locator) | Returns |
 |---|---|---|
 | `geocode_address` | `address`, optional `limit` | best match, coordinates, INSEE code, candidates |
-| `find_parcel` | `address`, or `lon` + `lat`, or `parcel_id` | parcel id, commune, section, number, area, centroid, geometry |
+| `find_parcel` | `address`, or `lon` + `lat`, or `parcel_id` | parcel id, commune, section, number, area, centroid, geometry; an address point on the road takes the nearest parcel within 10 m, with a warning |
 | `get_parcel_sales` | locator, optional `radius_m` (0 to 2000), `years` | DVF mutations on the parcel, and nearby when a radius is given, with price, date, buildings, land |
 | `get_zoning` | locator | planning document, zone(s) at the parcel, prescriptions, public-utility easements; RNU communes are reported as such |
 | `get_energy_diagnostics` | `address` or `ban_id` | DPE records for that address (existing and new buildings) |
@@ -160,9 +160,9 @@ python evals/run.py --offline    # replay of the 22 recorded cases, no network, 
 
 The dataset ([evals/dataset.json](evals/dataset.json)) holds 40 public parcels in 12 departments
 (13, 23, 31, 33, 34, 35, 48, 55, 59, 67, 69, 75), urban, periurban and rural: 24 with at least
-one DVF sale, 14 without any (town halls and public buildings), 2 in a department DVF does not
-cover, 6 in communes under the RNU with no digitised planning document. None belongs to the author
-or to his family.
+one DVF sale, 14 without any (public buildings, town halls and village parcels, 6 of them in
+communes under the RNU with no digitised planning document), 2 in a department DVF does not
+cover. None belongs to the author or to his family.
 
 The expected truth is recorded by [evals/truth/record.py](evals/truth/record.py) from official open
 data through a different path than the server: Etalab cadastre GeoJSON files with a pure Python
@@ -179,7 +179,35 @@ absence of invention: a value asserted where the sources hold none, a null witho
 value without source counts as a grave failure and fails the run. Latency is reported per tool.
 
 <!-- EVAL_RESULTS_START -->
-Results: not yet recorded.
+Measured on 2026-10-11 against the live public APIs (`python evals/run.py --live`, fresh
+cache), 40 cases, truth recorded 2026-10-11T17:40:21+00:00, wall time
+206 s. Report: [evals/results/2026-10-11-live.md](evals/results/2026-10-11-live.md).
+
+| Metric | Hit | Total | Rate |
+|---|---:|---:|---:|
+| geocode_address: right commune and within 150 m of the parcel | 34 | 34 | 100.0 % |
+| find_parcel from a point: Etalab cadastre parcel found | 40 | 40 | 100.0 % |
+| find_parcel from an address: expected parcel found | 28 | 34 | 82.3 % |
+| get_parcel_sales: recorded mutations returned (per mutation) | 31 | 31 | 100.0 % |
+| get_parcel_sales: returned mutations are recorded (per mutation) | 31 | 31 | 100.0 % |
+| get_parcel_sales: parcels without sale reported with zero sale | 14 | 14 | 100.0 % |
+| get_parcel_sales: uncovered department refused with not_covered | 2 | 2 | 100.0 % |
+| get_zoning: WFS zone label found among returned zones | 33 | 33 | 100.0 % |
+| get_zoning: RNU commune reported without zoning, with reason | 6 | 6 | 100.0 % |
+| summarize_parcel: envelope ok, every section answered or explained | 40 | 40 | 100.0 % |
+
+Invented values: 0. Crashes outside typed errors: 0.
+`summarize_parcel` latency over 40 live calls: median 2206 ms, p95 3129 ms,
+max 3610 ms.
+
+Misses on `find_parcel` from an address (6 of 34): `sale-33063-1` (neighbouring parcel); `sale-35051-1` (neighbouring parcel, same recorded sale); `sale-23030-1` (neighbouring parcel); `sale-55463-1` (neighbouring parcel); `public-31555` (open square, no parcel within 10 m, null returned with a reason); `public-35238` (neighbouring parcel).
+The BAN point lands inside, or nearest to, a neighbouring parcel, or in the middle of a square.
+The server returns what the point says, with the candidates in a warning, rather than
+guessing the intended parcel.
+
+The offline replay of the 22 recorded cases (`python evals/run.py --offline`, run in CI on
+every push) gave 13/16 on that metric and 100 % on the others, with
+0 invented values and 0 cache misses.
 <!-- EVAL_RESULTS_END -->
 
 Full reports with per-case detail are in [evals/results](evals/results). A weekly GitHub Action
@@ -274,6 +302,16 @@ are not created by this repository or by any script in it.
 
 ## Known limits
 
+- Paris, Lyon and Marseille: API Carto keys their parcels by the parent commune (75056, 69123,
+  13055) plus an arrondissement code, while the parcel id keeps the arrondissement INSEE code
+  (75111000AP0059). The server translates the lookup by id and reports the arrondissement
+  code, which is the one the DVF files and the GPU use. Georisques knows the Paris arrondissement
+  codes but not those of Lyon and Marseille: their commune-level risks are read for the parent
+  commune, and the response says so in a warning. Both found by the live evals on 2026-10-11.
+- Address points from the BAN often sit on the road axis, outside every parcel. `find_parcel`
+  then takes the nearest parcel within 10 m and says so in a warning that lists the
+  candidates. When the point lands inside a neighbouring parcel, the neighbour is returned:
+  the eval table counts those cases as misses.
 - The Geoplateforme reverse geocoder returns the nearest address, not the address inside the
   parcel; `get_energy_diagnostics` through `summarize_parcel` only keeps a housenumber match within
   30 m and otherwise says so.

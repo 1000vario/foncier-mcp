@@ -1,6 +1,6 @@
 {
  "version": "2026-10-11",
- "description": "40 public parcels in 12 departments, urban, periurban and rural. 24 with at least one DVF sale, 14 without (public buildings and town halls), 2 in a department DVF does not cover, 6 in communes without a digitised planning document (RNU). None belongs to the author or his family. Expected values are recorded by evals/truth/record.py from official open data.",
+ "description": "40 public parcels in 12 departments, urban, periurban and rural. 24 with at least one DVF sale, 14 without (public buildings, town halls and village parcels), 2 in a department DVF does not cover, 6 in communes without a digitised planning document (RNU). None belongs to the author or his family. Expected values are recorded by evals/truth/record.py from official open data.",
  "offline_subset": "cases with offline=true have their upstream responses recorded under evals/recorded and run in CI without network",
  "cases": [
   {
@@ -579,17 +579,17 @@
    "commune": "Toulouse",
    "input": {
     "address": "Place du Capitole 31000 Toulouse",
-    "lon": 1.443054,
-    "lat": 43.604354
+    "lon": 1.44425,
+    "lat": 43.60445
    },
    "expected": {
-    "parcel_id": null,
+    "parcel_id": "31555819AB0001",
     "dvf_covered": true,
     "has_sales": false,
     "has_urban_document": true
    },
    "offline": false,
-   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+   "note": "large public parcel east of Place du Capitole, no DVF sale; point moved on 2026-10-11 from the BAN position (public square, no parcel) to the parcel representative point from the Etalab cadastre"
   },
   {
    "id": "public-59350",
@@ -621,17 +621,17 @@
    "commune": "Rennes",
    "input": {
     "address": "Place de la Mairie 35000 Rennes",
-    "lon": -1.679255,
-    "lat": 48.110964
+    "lon": -1.680038,
+    "lat": 48.111354
    },
    "expected": {
-    "parcel_id": null,
+    "parcel_id": "35238000AC0526",
     "dvf_covered": true,
     "has_sales": false,
     "has_urban_document": true
    },
    "offline": false,
-   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+   "note": "public parcel west of Place de la Mairie, no DVF sale; point moved on 2026-10-11 from the BAN position (public square, no parcel) to the parcel representative point from the Etalab cadastre"
   },
   {
    "id": "public-13208",
@@ -719,28 +719,28 @@
   },
   {
    "id": "rnu-48167",
-   "kind": "rnu_town_hall",
+   "kind": "rnu_commune",
    "category": "rural",
    "department": "48",
    "insee": "48167",
    "commune": "Saint-Laurent-de-Veyres",
    "input": {
     "address": null,
-    "lon": 3.1288,
-    "lat": 44.7707
+    "lon": 3.128812,
+    "lat": 44.770598
    },
    "expected": {
-    "parcel_id": null,
+    "parcel_id": "481670000A0439",
     "dvf_covered": true,
     "has_sales": false,
     "has_urban_document": false
    },
    "offline": true,
-   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+   "note": "commune under the RNU (no local planning document); point is the representative point of a village parcel next to the town hall position from geo.api.gouv.fr, read 2026-10-11"
   },
   {
    "id": "rnu-48149",
-   "kind": "rnu_town_hall",
+   "kind": "rnu_commune",
    "category": "rural",
    "department": "48",
    "insee": "48149",
@@ -757,11 +757,11 @@
     "has_urban_document": false
    },
    "offline": true,
-   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+   "note": "commune under the RNU (no local planning document); point is the town hall position (inside a parcel) from geo.api.gouv.fr, read 2026-10-11"
   },
   {
    "id": "rnu-48054",
-   "kind": "rnu_town_hall",
+   "kind": "rnu_commune",
    "category": "rural",
    "department": "48",
    "insee": "48054",
@@ -778,11 +778,11 @@
     "has_urban_document": false
    },
    "offline": true,
-   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+   "note": "commune under the RNU (no local planning document); point is the town hall position (inside a parcel) from geo.api.gouv.fr, read 2026-10-11"
   },
   {
    "id": "rnu-48091",
-   "kind": "rnu_town_hall",
+   "kind": "rnu_commune",
    "category": "rural",
    "department": "48",
    "insee": "48091",
@@ -799,32 +799,32 @@
     "has_urban_document": false
    },
    "offline": true,
-   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+   "note": "commune under the RNU (no local planning document); point is the town hall position (inside a parcel) from geo.api.gouv.fr, read 2026-10-11"
   },
   {
    "id": "rnu-23055",
-   "kind": "rnu_town_hall",
+   "kind": "rnu_commune",
    "category": "rural",
    "department": "23",
    "insee": "23055",
    "commune": "Chatelard",
    "input": {
     "address": null,
-    "lon": 2.47,
-    "lat": 45.9637
+    "lon": 2.470162,
+    "lat": 45.96374
    },
    "expected": {
-    "parcel_id": null,
+    "parcel_id": "230550000A0600",
     "dvf_covered": true,
     "has_sales": false,
     "has_urban_document": false
    },
    "offline": true,
-   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+   "note": "commune under the RNU (no local planning document); point is the representative point of a village parcel next to the town hall position from geo.api.gouv.fr, read 2026-10-11"
   },
   {
    "id": "rnu-55055",
-   "kind": "rnu_town_hall",
+   "kind": "rnu_commune",
    "category": "rural",
    "department": "55",
    "insee": "55055",
@@ -841,7 +841,7 @@
     "has_urban_document": false
    },
    "offline": true,
-   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+   "note": "commune under the RNU (no local planning document); point is the town hall position (inside a parcel) from geo.api.gouv.fr, read 2026-10-11"
   }
  ]
 }

@@ -185,6 +185,19 @@ async def resolve_subject(
         point = _check_point(lon, lat)
 
     features, result = await cadastre.parcels_at_point(fetcher, point[0], point[1])
+    if not features and which == "address":
+        # BAN points often sit on the road axis: look a few metres around first.
+        near, near_result = await cadastre.parcels_near_point(fetcher, point[0], point[1])
+        if near:
+            chosen, distance = cadastre.nearest_feature(near, point[0], point[1])
+            ids = ", ".join(str((f.get("properties") or {}).get("idu")) for f in near)
+            dist_txt = f"{distance:.1f} m away" if distance is not None else "distance unknown"
+            warnings.append(
+                "the geocoded point lies outside every parcel, typically on the road: "
+                f"the nearest parcel within {cadastre.NEAR_METERS:g} m was taken ({dist_txt}); "
+                f"{len(near)} candidates: {ids}"
+            )
+            features, result = [chosen], near_result
     if not features:
         return Subject(
             None,
@@ -544,6 +557,9 @@ async def get_energy_diagnostics(
     return result
 
 
+AT_POINT = "Georisques returned nothing at this point"
+
+
 def _first(data: Any) -> dict[str, Any] | None:
     items = (data or {}).get("data") if isinstance(data, dict) else None
     if isinstance(items, list) and items:
@@ -574,11 +590,17 @@ def _hazard_labels(raw: Any) -> list[str] | None:
     return labels
 
 
-def _risk_field(call: dict[str, Any], transform: Callable[[Any], Any]) -> dict[str, Any]:
+def _risk_field(
+    call: dict[str, Any], transform: Callable[[Any], Any], absent: str
+) -> dict[str, Any]:
+    """A sourced risk field; `absent` is the reason written when the source holds nothing."""
     if call["error"] is not None:
         err: FoncierError = call["error"]
         return missing(georisques.SOURCE, f"Georisques did not answer: {err.message}")
-    return sourced(transform(call["data"]), georisques.SOURCE, call["result"].fetched_at)
+    value = transform(call["data"])
+    if value is None:
+        return missing(georisques.SOURCE, absent)
+    return sourced(value, georisques.SOURCE, call["result"].fetched_at)
 
 
 async def _risks_for_subject(fetcher: Fetcher, subject: Subject) -> ToolResult:
@@ -589,6 +611,15 @@ async def _risks_for_subject(fetcher: Fetcher, subject: Subject) -> ToolResult:
     if subject.parcel is not None:
         result.data["parcel"] = subject.parcel_field()
     commune = await georisques.by_commune(fetcher, insee)
+    parents = {c["insee"] for c in commune.values() if c.get("insee") not in (None, insee)}
+    if parents:
+        result.warnings.append(
+            f"Georisques does not know the arrondissement code {insee}: commune-level risks "
+            f"were read for the parent commune {sorted(parents)[0]}"
+        )
+
+    def none_for(what: str) -> str:
+        return f"Georisques returned no {what} for commune {insee}"
 
     def inventory(data: Any) -> list[dict[str, Any]]:
         first = _first(data) or {}
@@ -641,11 +672,19 @@ async def _risks_for_subject(fetcher: Fetcher, subject: Subject) -> ToolResult:
         ]
 
     result.data["commune"] = {
-        "risks_inventory": _risk_field(commune["risks_inventory"], inventory),
-        "seismic_zone": _risk_field(commune["seismic_zone"], seismic),
-        "radon_potential": _risk_field(commune["radon_potential"], radon),
-        "natural_disaster_orders": _risk_field(commune["natural_disaster_orders"], catnat),
-        "flood_risk_territories": _risk_field(commune["flood_risk_territory"], tri),
+        "risks_inventory": _risk_field(
+            commune["risks_inventory"], inventory, none_for("risk inventory")
+        ),
+        "seismic_zone": _risk_field(commune["seismic_zone"], seismic, none_for("seismic zone")),
+        "radon_potential": _risk_field(
+            commune["radon_potential"], radon, none_for("radon potential")
+        ),
+        "natural_disaster_orders": _risk_field(
+            commune["natural_disaster_orders"], catnat, none_for("natural disaster order")
+        ),
+        "flood_risk_territories": _risk_field(
+            commune["flood_risk_territory"], tri, none_for("flood risk territory")
+        ),
     }
 
     if subject.point is None:
@@ -698,11 +737,17 @@ async def _risks_for_subject(fetcher: Fetcher, subject: Subject) -> ToolResult:
 
     result.data["point"] = {
         "lookup_point": sourced({"lon": lon, "lat": lat}, "foncier_mcp", None),
-        "clay_shrink_swell": _risk_field(point["clay_shrink_swell"], rga),
-        "flood_zoning_100m": _risk_field(point["flood_zoning"], flood_zoning),
-        "underground_cavities_500m": _risk_field(point["underground_cavities_500m"], listing),
-        "ground_movements_500m": _risk_field(point["ground_movements_500m"], listing),
-        "classified_installations_1km": _risk_field(point["classified_installations_1km"], icpe),
+        "clay_shrink_swell": _risk_field(
+            point["clay_shrink_swell"], rga, "Georisques returned no clay zone at this point"
+        ),
+        "flood_zoning_100m": _risk_field(point["flood_zoning"], flood_zoning, AT_POINT),
+        "underground_cavities_500m": _risk_field(
+            point["underground_cavities_500m"], listing, AT_POINT
+        ),
+        "ground_movements_500m": _risk_field(point["ground_movements_500m"], listing, AT_POINT),
+        "classified_installations_1km": _risk_field(
+            point["classified_installations_1km"], icpe, AT_POINT
+        ),
     }
     return result
 

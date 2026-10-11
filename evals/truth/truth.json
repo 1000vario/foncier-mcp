@@ -1,0 +1,1725 @@
+{
+ "recorded_at": "2026-10-11T17:40:21+00:00",
+ "sources": {
+  "parcel": "https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/{dep}/{insee}/cadastre-{insee}-parcelles.json.gz",
+  "dvf": "https://files.data.gouv.fr/geo-dvf/latest/csv/{year}/communes/{dep}/{insee}.csv",
+  "zoning": "https://data.geopf.fr/wfs/ows (wfs_du:zone_urba, wfs_du:municipality)"
+ },
+ "method": "Record the expected truth of every eval case from official open data, by a different path\nthan the server uses.\n\nSources and access paths (all public, Licence Ouverte 2.0):\n  parcel at a point   Etalab cadastre GeoJSON files (cadastre.data.gouv.fr), point-in-polygon in\n                      pure Python. The server uses the IGN API Carto instead.\n  DVF mutations       geo-dvf commune CSV files (files.data.gouv.fr), filtered on id_parcelle.\n                      The server reads the same files, so this part is a parsing check, not an\n                      independent measurement. The README says so.\n  zoning              Geoplateforme WFS wfs_du:zone_urba, INTERSECTS at the parcel\n                      representative point, and wfs_du:municipality for the RNU flag.\n                      The server uses API Carto GPU instead.\n\nUsage: python evals/truth/record.py [--dataset evals/dataset.json] [--out evals/truth/truth.json]\nDownloads land in evals/truth/_downloads/ (git-ignored) and are reused on later runs.",
+ "cases": {
+  "sale-34172-1": {
+   "insee": "34172",
+   "parcel_at_point": "34172000HL0365",
+   "parcel_id": "34172000HL0365",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.8826427,
+    "lat": 43.6056844
+   },
+   "area_m2": 401,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2023-438361",
+     "2025-436287"
+    ],
+    "files": {
+     "2021": 19121,
+     "2022": 19551,
+     "2023": 15355,
+     "2024": 13272,
+     "2025": 14062
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "MONTPELLIER"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UA 1-1-1",
+      "typezone": "U",
+      "idurba": "243400017_PLUi_20260602",
+      "partition": "DU_243400017"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.8826427,
+     "lat": 43.6056844
+    }
+   },
+   "recorded_at": "2026-10-11T17:35:47+00:00"
+  },
+  "sale-34172-2": {
+   "insee": "34172",
+   "parcel_at_point": "34172000KY0007",
+   "parcel_id": "34172000KY0007",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.8294657,
+    "lat": 43.6147718
+   },
+   "area_m2": 93,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2024-402111"
+    ],
+    "files": {
+     "2021": 19121,
+     "2022": 19551,
+     "2023": 15355,
+     "2024": 13272,
+     "2025": 14062
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "MONTPELLIER"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UA 3-1",
+      "typezone": "U",
+      "idurba": "243400017_PLUi_20260602",
+      "partition": "DU_243400017"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.8294657,
+     "lat": 43.6147718
+    }
+   },
+   "recorded_at": "2026-10-11T17:35:48+00:00"
+  },
+  "sale-69383-1": {
+   "insee": "69383",
+   "parcel_at_point": "69383000BD0005",
+   "parcel_id": "69383000BD0005",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 4.8654244,
+    "lat": 45.7509567
+   },
+   "area_m2": 334,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2021-1153129",
+     "2025-887342"
+    ],
+    "files": {
+     "2021": 5479,
+     "2022": 5689,
+     "2023": 4193,
+     "2024": 4193,
+     "2025": 4597
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "LYON-3E-ARRONDISSEMENT"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UCe3a",
+      "typezone": "U",
+      "idurba": "200046977_PLUI_20260326",
+      "partition": "DU_200046977"
+     }
+    ],
+    "zone_point": {
+     "lon": 4.8654244,
+     "lat": 45.7509567
+    }
+   },
+   "recorded_at": "2026-10-11T17:35:50+00:00"
+  },
+  "sale-33063-1": {
+   "insee": "33063",
+   "parcel_at_point": "33063000MX0250",
+   "parcel_id": "33063000MX0250",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": -0.5998523,
+    "lat": 44.8454245
+   },
+   "area_m2": 98,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2021-512887",
+     "2022-500876",
+     "2024-374645"
+    ],
+    "files": {
+     "2021": 15864,
+     "2022": 16243,
+     "2023": 12033,
+     "2024": 11680,
+     "2025": 15456
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "BORDEAUX"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UP1",
+      "typezone": "U",
+      "idurba": "243300316_PLUI_20260505",
+      "partition": "DU_243300316"
+     }
+    ],
+    "zone_point": {
+     "lon": -0.5998523,
+     "lat": 44.8454245
+    }
+   },
+   "recorded_at": "2026-10-11T17:35:54+00:00"
+  },
+  "sale-31555-1": {
+   "insee": "31555",
+   "parcel_at_point": "31555823AB0306",
+   "parcel_id": "31555823AB0306",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 1.4424086,
+    "lat": 43.612698
+   },
+   "area_m2": 158,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2024-334765"
+    ],
+    "files": {
+     "2021": 32442,
+     "2022": 33583,
+     "2023": 24749,
+     "2024": 22592,
+     "2025": 24567
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "TOULOUSE"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UM1-3",
+      "typezone": "U",
+      "idurba": "243100518_PLUI_20251218",
+      "partition": "DU_243100518"
+     }
+    ],
+    "zone_point": {
+     "lon": 1.4424086,
+     "lat": 43.612698
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:00+00:00"
+  },
+  "sale-31555-2": {
+   "insee": "31555",
+   "parcel_at_point": "31555831AO0050",
+   "parcel_id": "31555831AO0050",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 1.4544357,
+    "lat": 43.6276405
+   },
+   "area_m2": 748,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2024-351049"
+    ],
+    "files": {
+     "2021": 32442,
+     "2022": 33583,
+     "2023": 24749,
+     "2024": 22592,
+     "2025": 24567
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "TOULOUSE"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UM6-3",
+      "typezone": "U",
+      "idurba": "243100518_PLUI_20251218",
+      "partition": "DU_243100518"
+     }
+    ],
+    "zone_point": {
+     "lon": 1.4544357,
+     "lat": 43.6276405
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:02+00:00"
+  },
+  "sale-59350-1": {
+   "insee": "59350",
+   "parcel_at_point": "59350000OY0326",
+   "parcel_id": "59350000OY0326",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.063685,
+    "lat": 50.6206171
+   },
+   "area_m2": 74,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-743123"
+    ],
+    "files": {
+     "2021": 13674,
+     "2022": 12990,
+     "2023": 9595,
+     "2024": 8427,
+     "2025": 10412
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "LILLE"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UCM2.1.1",
+      "typezone": "U",
+      "idurba": "200093201_PLUI_20260520",
+      "partition": "DU_200093201"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.063685,
+     "lat": 50.6206171
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:06+00:00"
+  },
+  "sale-35238-1": {
+   "insee": "35238",
+   "parcel_at_point": "35238000BV0645",
+   "parcel_id": "35238000BV0645",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": -1.6792675,
+    "lat": 48.0977317
+   },
+   "area_m2": 335,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2024-430995"
+    ],
+    "files": {
+     "2021": 12902,
+     "2022": 12921,
+     "2023": 10649,
+     "2024": 9260,
+     "2025": 10418
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "RENNES"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UE1a",
+      "typezone": "U",
+      "idurba": "243500139_PLUI_20260917",
+      "partition": "DU_243500139"
+     }
+    ],
+    "zone_point": {
+     "lon": -1.6792675,
+     "lat": 48.0977317
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:09+00:00"
+  },
+  "sale-75111-1": {
+   "insee": "75111",
+   "parcel_at_point": "75111000AP0059",
+   "parcel_id": "75111000AP0059",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 2.370314,
+    "lat": 48.8615676
+   },
+   "area_m2": 293,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2021-1716596",
+     "2021-1716880",
+     "2023-1349497",
+     "2025-1312021"
+    ],
+    "files": {
+     "2021": 5857,
+     "2022": 7327,
+     "2023": 5691,
+     "2024": 6194,
+     "2025": 6168
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "PARIS-11E-ARRONDISSEMENT"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UG",
+      "typezone": "U",
+      "idurba": "75056_PLU_20260616",
+      "partition": "DU_75056"
+     }
+    ],
+    "zone_point": {
+     "lon": 2.370314,
+     "lat": 48.8615676
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:12+00:00"
+  },
+  "sale-13208-1": {
+   "insee": "13208",
+   "parcel_at_point": "132088360K0120",
+   "parcel_id": "132088360K0120",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 5.3775214,
+    "lat": 43.2500686
+   },
+   "area_m2": 123,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-138734"
+    ],
+    "files": {
+     "2021": 5787,
+     "2022": 5221,
+     "2023": 3986,
+     "2024": 4138,
+     "2025": 4336
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "MARSEILLE-8E-ARRONDISSEMENT"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UBt2",
+      "typezone": "U",
+      "idurba": "200054807_PLUI_20260803_A",
+      "partition": "DU_200054807_A"
+     }
+    ],
+    "zone_point": {
+     "lon": 5.3775214,
+     "lat": 43.2500686
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:17+00:00"
+  },
+  "sale-34057-1": {
+   "insee": "34057",
+   "parcel_at_point": "34057000CV0052",
+   "parcel_id": "34057000CV0052",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.9246609,
+    "lat": 43.6419139
+   },
+   "area_m2": 475,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-436260"
+    ],
+    "files": {
+     "2021": 2434,
+     "2022": 2300,
+     "2023": 1644,
+     "2024": 1141,
+     "2025": 1247
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "CASTELNAU-LE-LEZ"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UC 3-2",
+      "typezone": "U",
+      "idurba": "243400017_PLUi_20260602",
+      "partition": "DU_243400017"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.9246609,
+     "lat": 43.6419139
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:19+00:00"
+  },
+  "sale-33281-1": {
+   "insee": "33281",
+   "parcel_at_point": "33281000CR0045",
+   "parcel_id": "33281000CR0045",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": -0.6217178,
+    "lat": 44.8225902
+   },
+   "area_m2": 415,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-395190"
+    ],
+    "files": {
+     "2021": 4111,
+     "2022": 4323,
+     "2023": 3386,
+     "2024": 3026,
+     "2025": 5070
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "MERIGNAC"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UM6",
+      "typezone": "U",
+      "idurba": "243300316_PLUI_20260505",
+      "partition": "DU_243300316"
+     }
+    ],
+    "zone_point": {
+     "lon": -0.6217178,
+     "lat": 44.8225902
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:22+00:00"
+  },
+  "sale-31069-1": {
+   "insee": "31069",
+   "parcel_at_point": "31069000AW0443",
+   "parcel_id": "31069000AW0443",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 1.3954513,
+    "lat": 43.6398589
+   },
+   "area_m2": 233,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-363240"
+    ],
+    "files": {
+     "2021": 1370,
+     "2022": 1293,
+     "2023": 1173,
+     "2024": 1208,
+     "2025": 1225
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "BLAGNAC"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UM7",
+      "typezone": "U",
+      "idurba": "243100518_PLUI_20251218",
+      "partition": "DU_243100518"
+     }
+    ],
+    "zone_point": {
+     "lon": 1.3954513,
+     "lat": 43.6398589
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:24+00:00"
+  },
+  "sale-35051-1": {
+   "insee": "35051",
+   "parcel_at_point": "35051000AT0168",
+   "parcel_id": "35051000AT0168",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": -1.6141654,
+    "lat": 48.1130593
+   },
+   "area_m2": 10,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2024-442410"
+    ],
+    "files": {
+     "2021": 1517,
+     "2022": 1251,
+     "2023": 783,
+     "2024": 1138,
+     "2025": 967
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "CESSON-SEVIGNE"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UE1a",
+      "typezone": "U",
+      "idurba": "243500139_PLUI_20260917",
+      "partition": "DU_243500139"
+     }
+    ],
+    "zone_point": {
+     "lon": -1.6141654,
+     "lat": 48.1130593
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:27+00:00"
+  },
+  "sale-59009-1": {
+   "insee": "59009",
+   "parcel_at_point": "59009000PK0556",
+   "parcel_id": "59009000PK0556",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.1608745,
+    "lat": 50.613777
+   },
+   "area_m2": 206,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2024-681782"
+    ],
+    "files": {
+     "2021": 3412,
+     "2022": 2485,
+     "2023": 2330,
+     "2024": 2352,
+     "2025": 1944
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "VILLENEUVE-D'ASCQ"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UCA3.1",
+      "typezone": "U",
+      "idurba": "200093201_PLUI_20260520",
+      "partition": "DU_200093201"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.1608745,
+     "lat": 50.613777
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:30+00:00"
+  },
+  "sale-69029-1": {
+   "insee": "69029",
+   "parcel_at_point": "690290000F0864",
+   "parcel_id": "690290000F0864",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 4.9139236,
+    "lat": 45.7421971
+   },
+   "area_m2": 513,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-889848"
+    ],
+    "files": {
+     "2021": 2261,
+     "2022": 2276,
+     "2023": 2087,
+     "2024": 1717,
+     "2025": 1774
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "BRON"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "URi2b",
+      "typezone": "U",
+      "idurba": "200046977_PLUI_20260326",
+      "partition": "DU_200046977"
+     }
+    ],
+    "zone_point": {
+     "lon": 4.9139236,
+     "lat": 45.7421971
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:32+00:00"
+  },
+  "sale-48092-1": {
+   "insee": "48092",
+   "parcel_at_point": "480920000C1332",
+   "parcel_id": "480920000C1332",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.2875732,
+    "lat": 44.5526218
+   },
+   "area_m2": 972,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2024-587555"
+    ],
+    "files": {
+     "2021": 388,
+     "2022": 352,
+     "2023": 441,
+     "2024": 220,
+     "2025": 220
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "MARVEJOLS"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "Uc",
+      "typezone": "U",
+      "idurba": "48092_PLU_20250925",
+      "partition": "DU_48092"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.2875732,
+     "lat": 44.5526218
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:34+00:00"
+  },
+  "sale-48092-2": {
+   "insee": "48092",
+   "parcel_at_point": "480920000A1315",
+   "parcel_id": "480920000A1315",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.2897177,
+    "lat": 44.5669985
+   },
+   "area_m2": 2192,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2024-586246"
+    ],
+    "files": {
+     "2021": 388,
+     "2022": 352,
+     "2023": 441,
+     "2024": 220,
+     "2025": 220
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "MARVEJOLS"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "Uc",
+      "typezone": "U",
+      "idurba": "48092_PLU_20250925",
+      "partition": "DU_48092"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.2897177,
+     "lat": 44.5669985
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:36+00:00"
+  },
+  "sale-48080-1": {
+   "insee": "48080",
+   "parcel_at_point": "48080000AL0522",
+   "parcel_id": "48080000AL0522",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.8524004,
+    "lat": 44.726479
+   },
+   "area_m2": 400,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-622136"
+    ],
+    "files": {
+     "2021": 247,
+     "2022": 183,
+     "2023": 187,
+     "2024": 218,
+     "2025": 171
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "LANGOGNE"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "Ua",
+      "typezone": "U",
+      "idurba": "200006930_PLUi_20260129",
+      "partition": "DU_200006930"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.8524004,
+     "lat": 44.726479
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:38+00:00"
+  },
+  "sale-23008-1": {
+   "insee": "23008",
+   "parcel_at_point": "23008000AI0366",
+   "parcel_id": "23008000AI0366",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 2.164632,
+    "lat": 45.9523856
+   },
+   "area_m2": 354,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-251193"
+    ],
+    "files": {
+     "2021": 372,
+     "2022": 365,
+     "2023": 424,
+     "2024": 331,
+     "2025": 282
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "AUBUSSON"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "Ub",
+      "typezone": "U",
+      "idurba": "23008_PLU_20210607",
+      "partition": "DU_23008"
+     }
+    ],
+    "zone_point": {
+     "lon": 2.164632,
+     "lat": 45.9523856
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:41+00:00"
+  },
+  "sale-55122-1": {
+   "insee": "55122",
+   "parcel_at_point": "55122000AB0089",
+   "parcel_id": "55122000AB0089",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 5.5937364,
+    "lat": 48.7619587
+   },
+   "area_m2": 52,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2024-655736"
+    ],
+    "files": {
+     "2021": 289,
+     "2022": 217,
+     "2023": 314,
+     "2024": 207,
+     "2025": 280
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "COMMERCY"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UAa",
+      "typezone": "U",
+      "idurba": "55122_PLU_20251104",
+      "partition": "DU_55122"
+     }
+    ],
+    "zone_point": {
+     "lon": 5.5937364,
+     "lat": 48.7619587
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:43+00:00"
+  },
+  "sale-34274-1": {
+   "insee": "34274",
+   "parcel_at_point": "34274000BP0009",
+   "parcel_id": "34274000BP0009",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.7249575,
+    "lat": 43.7999329
+   },
+   "area_m2": 943,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-436426"
+    ],
+    "files": {
+     "2021": 126,
+     "2022": 93,
+     "2023": 59,
+     "2024": 66,
+     "2025": 37
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "SAINT-MARTIN-DE-LONDRES"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UE2",
+      "typezone": "U",
+      "idurba": "34274_PLU_20250710",
+      "partition": "DU_34274"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.7249575,
+     "lat": 43.7999329
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:45+00:00"
+  },
+  "sale-23030-1": {
+   "insee": "23030",
+   "parcel_at_point": "23030000AZ0378",
+   "parcel_id": "23030000AZ0378",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 1.753798,
+    "lat": 45.9532442
+   },
+   "area_m2": 214,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-252613"
+    ],
+    "files": {
+     "2021": 160,
+     "2022": 169,
+     "2023": 255,
+     "2024": 172,
+     "2025": 144
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "BOURGANEUF"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UA",
+      "typezone": "U",
+      "idurba": "23030_PLU_20251014",
+      "partition": "DU_23030"
+     }
+    ],
+    "zone_point": {
+     "lon": 1.753798,
+     "lat": 45.9532442
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:48+00:00"
+  },
+  "sale-55463-1": {
+   "insee": "55463",
+   "parcel_at_point": "55463000AB0315",
+   "parcel_id": "55463000AB0315",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 5.5421224,
+    "lat": 48.8907394
+   },
+   "area_m2": 58,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [
+     "2025-694028"
+    ],
+    "files": {
+     "2021": 397,
+     "2022": 301,
+     "2023": 188,
+     "2024": 304,
+     "2025": 168
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "SAINT-MIHIEL"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UA",
+      "typezone": "U",
+      "idurba": "55463_PLU_20260619",
+      "partition": "DU_55463"
+     }
+    ],
+    "zone_point": {
+     "lon": 5.5421224,
+     "lat": 48.8907394
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:50+00:00"
+  },
+  "public-34172": {
+   "insee": "34172",
+   "parcel_at_point": "34172000DS0599",
+   "parcel_id": "34172000DS0599",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.8963179,
+    "lat": 43.5990171
+   },
+   "area_m2": 23673,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 19121,
+     "2022": 19551,
+     "2023": 15355,
+     "2024": 13272,
+     "2025": 14062
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "MONTPELLIER"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UB 1-2-a",
+      "typezone": "U",
+      "idurba": "243400017_PLUi_20260602",
+      "partition": "DU_243400017"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.8963179,
+     "lat": 43.5990171
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:52+00:00"
+  },
+  "public-69383": {
+   "insee": "69383",
+   "parcel_at_point": "69383000AE0065",
+   "parcel_id": "69383000AE0065",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 4.8493359,
+    "lat": 45.760073
+   },
+   "area_m2": 2634,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 5479,
+     "2022": 5689,
+     "2023": 4193,
+     "2024": 4193,
+     "2025": 4597
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "LYON-3E-ARRONDISSEMENT"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UCe2a",
+      "typezone": "U",
+      "idurba": "200046977_PLUI_20260326",
+      "partition": "DU_200046977"
+     }
+    ],
+    "zone_point": {
+     "lon": 4.8493359,
+     "lat": 45.760073
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:53+00:00"
+  },
+  "public-33063": {
+   "insee": "33063",
+   "parcel_at_point": "33063000KE0112",
+   "parcel_id": "33063000KE0112",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": -0.5778086,
+    "lat": 44.837663
+   },
+   "area_m2": 7117,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 15864,
+     "2022": 16243,
+     "2023": 12033,
+     "2024": 11680,
+     "2025": 15456
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "BORDEAUX"
+    },
+    "is_rnu": false,
+    "zones": [],
+    "zone_point": {
+     "lon": -0.5778086,
+     "lat": 44.837663
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:54+00:00"
+  },
+  "public-31555": {
+   "insee": "31555",
+   "parcel_at_point": "31555819AB0001",
+   "parcel_id": "31555819AB0001",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 1.4442498,
+    "lat": 43.6044502
+   },
+   "area_m2": 5360,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 32442,
+     "2022": 33583,
+     "2023": 24749,
+     "2024": 22592,
+     "2025": 24567
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "TOULOUSE"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "PSMV",
+      "typezone": "U",
+      "idurba": "31555_PSMV_20250217",
+      "partition": "PSMV_31555"
+     }
+    ],
+    "zone_point": {
+     "lon": 1.4442498,
+     "lat": 43.6044502
+    }
+   },
+   "recorded_at": "2026-10-11T17:40:15+00:00"
+  },
+  "public-59350": {
+   "insee": "59350",
+   "parcel_at_point": "59350000TR0007",
+   "parcel_id": "59350000TR0007",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.0709784,
+    "lat": 50.630719
+   },
+   "area_m2": 6533,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 13674,
+     "2022": 12990,
+     "2023": 9595,
+     "2024": 8427,
+     "2025": 10412
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "LILLE"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UCM1.1.1",
+      "typezone": "U",
+      "idurba": "200093201_PLUI_20260520",
+      "partition": "DU_200093201"
+     }
+    ],
+    "zone_point": {
+     "lon": 3.0709784,
+     "lat": 50.630719
+    }
+   },
+   "recorded_at": "2026-10-11T17:36:57+00:00"
+  },
+  "public-35238": {
+   "insee": "35238",
+   "parcel_at_point": "35238000AC0526",
+   "parcel_id": "35238000AC0526",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": -1.6800384,
+    "lat": 48.1113542
+   },
+   "area_m2": 1612,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 12902,
+     "2022": 12921,
+     "2023": 10649,
+     "2024": 9260,
+     "2025": 10418
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "RENNES"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "psmv",
+      "typezone": "U",
+      "idurba": "35238_PSMV_20240206",
+      "partition": "PSMV_35238"
+     }
+    ],
+    "zone_point": {
+     "lon": -1.6800384,
+     "lat": 48.1113542
+    }
+   },
+   "recorded_at": "2026-10-11T17:40:18+00:00"
+  },
+  "public-13208": {
+   "insee": "13208",
+   "parcel_at_point": "132088430N0001",
+   "parcel_id": "132088430N0001",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 5.3823106,
+    "lat": 43.2700314
+   },
+   "area_m2": 13974,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 5787,
+     "2022": 5221,
+     "2023": 3986,
+     "2024": 4138,
+     "2025": 4336
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "MARSEILLE-8E-ARRONDISSEMENT"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UQP",
+      "typezone": "U",
+      "idurba": "200054807_PLUI_20260803_A",
+      "partition": "DU_200054807_A"
+     }
+    ],
+    "zone_point": {
+     "lon": 5.3823106,
+     "lat": 43.2700314
+    }
+   },
+   "recorded_at": "2026-10-11T17:37:00+00:00"
+  },
+  "public-75111": {
+   "insee": "75111",
+   "parcel_at_point": "75111000BL0092",
+   "parcel_id": "75111000BL0092",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 2.3792859,
+    "lat": 48.8587173
+   },
+   "area_m2": 2162,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 5857,
+     "2022": 7327,
+     "2023": 5691,
+     "2024": 6194,
+     "2025": 6168
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "PARIS-11E-ARRONDISSEMENT"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UG",
+      "typezone": "U",
+      "idurba": "75056_PLU_20260616",
+      "partition": "DU_75056"
+     }
+    ],
+    "zone_point": {
+     "lon": 2.3792859,
+     "lat": 48.8587173
+    }
+   },
+   "recorded_at": "2026-10-11T17:37:02+00:00"
+  },
+  "notcovered-67482-1": {
+   "insee": "67482",
+   "parcel_at_point": "67482000DI0120",
+   "parcel_id": "67482000DI0120",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 7.7519869,
+    "lat": 48.5733536
+   },
+   "area_m2": 39513,
+   "dvf": {
+    "covered": false,
+    "mutation_ids": null,
+    "files": null
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "STRASBOURG"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "UD1",
+      "typezone": "U",
+      "idurba": "246700488_PLUI_20260206",
+      "partition": "DU_246700488"
+     }
+    ],
+    "zone_point": {
+     "lon": 7.7519869,
+     "lat": 48.5733536
+    }
+   },
+   "recorded_at": "2026-10-11T17:37:05+00:00"
+  },
+  "notcovered-67482-2": {
+   "insee": "67482",
+   "parcel_at_point": "67482000640001",
+   "parcel_id": "67482000640001",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 7.7507332,
+    "lat": 48.5846928
+   },
+   "area_m2": 4033,
+   "dvf": {
+    "covered": false,
+    "mutation_ids": null,
+    "files": null
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": false,
+     "name": "STRASBOURG"
+    },
+    "is_rnu": false,
+    "zones": [
+     {
+      "libelle": "US1",
+      "typezone": "U",
+      "idurba": "67482_PSMV_20230707",
+      "partition": "PSMV_67482"
+     }
+    ],
+    "zone_point": {
+     "lon": 7.7507332,
+     "lat": 48.5846928
+    }
+   },
+   "recorded_at": "2026-10-11T17:37:06+00:00"
+  },
+  "rnu-48167": {
+   "insee": "48167",
+   "parcel_at_point": "481670000A0439",
+   "parcel_id": "481670000A0439",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.1288117,
+    "lat": 44.7705982
+   },
+   "area_m2": 200,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 76,
+     "2022": 28,
+     "2023": 30,
+     "2024": 2,
+     "2025": 11
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": true,
+     "name": "SAINT-LAURENT-DE-VEYRES"
+    },
+    "is_rnu": true,
+    "zones": [],
+    "zone_point": {
+     "lon": 3.1288117,
+     "lat": 44.7705982
+    }
+   },
+   "recorded_at": "2026-10-11T17:40:19+00:00"
+  },
+  "rnu-48149": {
+   "insee": "48149",
+   "parcel_at_point": "481490000A0035",
+   "parcel_id": "481490000A0035",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.4671792,
+    "lat": 44.7909913
+   },
+   "area_m2": 225,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 12,
+     "2022": 9,
+     "2023": 8,
+     "2024": 34,
+     "2025": 5
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": true,
+     "name": "SAINTE-EULALIE"
+    },
+    "is_rnu": true,
+    "zones": [],
+    "zone_point": {
+     "lon": 3.4671792,
+     "lat": 44.7909913
+    }
+   },
+   "recorded_at": "2026-10-11T17:37:20+00:00"
+  },
+  "rnu-48054": {
+   "insee": "48054",
+   "parcel_at_point": "480540000A0565",
+   "parcel_id": "480540000A0565",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.7874202,
+    "lat": 44.4601442
+   },
+   "area_m2": 155,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 9,
+     "2022": 6,
+     "2023": 14,
+     "2024": 13,
+     "2025": 15
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": true,
+     "name": "CUBIERETTES"
+    },
+    "is_rnu": true,
+    "zones": [],
+    "zone_point": {
+     "lon": 3.7874202,
+     "lat": 44.4601442
+    }
+   },
+   "recorded_at": "2026-10-11T17:37:27+00:00"
+  },
+  "rnu-48091": {
+   "insee": "48091",
+   "parcel_at_point": "480910000D0174",
+   "parcel_id": "480910000D0174",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 3.1063377,
+    "lat": 44.6510461
+   },
+   "area_m2": 284,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 2,
+     "2022": 2,
+     "2023": "http_404",
+     "2024": 16,
+     "2025": 4
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": true,
+     "name": "MARCHASTEL"
+    },
+    "is_rnu": true,
+    "zones": [],
+    "zone_point": {
+     "lon": 3.1063377,
+     "lat": 44.6510461
+    }
+   },
+   "recorded_at": "2026-10-11T17:37:33+00:00"
+  },
+  "rnu-23055": {
+   "insee": "23055",
+   "parcel_at_point": "230550000A0600",
+   "parcel_id": "230550000A0600",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 2.4701617,
+    "lat": 45.9637396
+   },
+   "area_m2": 285,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": 4,
+     "2022": 15,
+     "2023": 15,
+     "2024": 32,
+     "2025": 10
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": true,
+     "name": "CHATELARD"
+    },
+    "is_rnu": true,
+    "zones": [],
+    "zone_point": {
+     "lon": 2.4701617,
+     "lat": 45.9637396
+    }
+   },
+   "recorded_at": "2026-10-11T17:40:21+00:00"
+  },
+  "rnu-55055": {
+   "insee": "55055",
+   "parcel_at_point": "55055000ZB0014",
+   "parcel_id": "55055000ZB0014",
+   "parcel_exists_in_etalab": true,
+   "point_in_expected_parcel": true,
+   "representative_point": {
+    "lon": 5.5370999,
+    "lat": 49.1597856
+   },
+   "area_m2": 70,
+   "dvf": {
+    "covered": true,
+    "mutation_ids": [],
+    "files": {
+     "2021": "http_404",
+     "2022": 5,
+     "2023": "http_404",
+     "2024": "http_404",
+     "2025": "http_404"
+    }
+   },
+   "zoning": {
+    "municipality": {
+     "is_rnu": true,
+     "name": "BLANZEE"
+    },
+    "is_rnu": true,
+    "zones": [],
+    "zone_point": {
+     "lon": 5.5370999,
+     "lat": 49.1597856
+    }
+   },
+   "recorded_at": "2026-10-11T17:37:44+00:00"
+  }
+ }
+}

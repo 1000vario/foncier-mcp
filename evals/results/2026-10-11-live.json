@@ -1,0 +1,1663 @@
+{
+ "date": "2026-10-11",
+ "generated_at": "2026-10-11T18:15:52+00:00",
+ "mode": "live",
+ "version": "0.1.0",
+ "cases": 40,
+ "truth_recorded_at": "2026-10-11T17:40:21+00:00",
+ "wall_seconds": 206.4,
+ "metrics": {
+  "geocoding": {
+   "label": "geocode_address: right commune and within 150 m of the parcel",
+   "hit": 34,
+   "total": 34,
+   "rate": 1.0,
+   "misses": []
+  },
+  "parcel_by_point": {
+   "label": "find_parcel from a point: Etalab cadastre parcel found",
+   "hit": 40,
+   "total": 40,
+   "rate": 1.0,
+   "misses": []
+  },
+  "parcel_by_address": {
+   "label": "find_parcel from an address: expected parcel found",
+   "hit": 28,
+   "total": 34,
+   "rate": 0.8235,
+   "misses": [
+    "sale-33063-1",
+    "sale-35051-1",
+    "sale-23030-1",
+    "sale-55463-1",
+    "public-31555",
+    "public-35238"
+   ]
+  },
+  "dvf_recall": {
+   "label": "get_parcel_sales: recorded mutations returned (per mutation)",
+   "hit": 31,
+   "total": 31,
+   "rate": 1.0,
+   "misses": []
+  },
+  "dvf_precision": {
+   "label": "get_parcel_sales: returned mutations are recorded (per mutation)",
+   "hit": 31,
+   "total": 31,
+   "rate": 1.0,
+   "misses": []
+  },
+  "dvf_no_sale": {
+   "label": "get_parcel_sales: parcels without sale reported with zero sale",
+   "hit": 14,
+   "total": 14,
+   "rate": 1.0,
+   "misses": []
+  },
+  "dvf_not_covered": {
+   "label": "get_parcel_sales: uncovered department refused with not_covered",
+   "hit": 2,
+   "total": 2,
+   "rate": 1.0,
+   "misses": []
+  },
+  "zoning_label": {
+   "label": "get_zoning: WFS zone label found among returned zones",
+   "hit": 33,
+   "total": 33,
+   "rate": 1.0,
+   "misses": []
+  },
+  "zoning_rnu": {
+   "label": "get_zoning: RNU commune reported without zoning, with reason",
+   "hit": 6,
+   "total": 6,
+   "rate": 1.0,
+   "misses": []
+  },
+  "summary_ok": {
+   "label": "summarize_parcel: envelope ok, every section answered or explained",
+   "hit": 40,
+   "total": 40,
+   "rate": 1.0,
+   "misses": []
+  }
+ },
+ "latency_ms": {
+  "find_parcel": {
+   "calls": 74,
+   "median_ms": 61,
+   "p95_ms": 427,
+   "max_ms": 798
+  },
+  "geocode_address": {
+   "calls": 34,
+   "median_ms": 48,
+   "p95_ms": 193,
+   "max_ms": 779
+  },
+  "get_parcel_sales": {
+   "calls": 40,
+   "median_ms": 1750,
+   "p95_ms": 3033,
+   "max_ms": 3431
+  },
+  "get_zoning": {
+   "calls": 40,
+   "median_ms": 958,
+   "p95_ms": 2348,
+   "max_ms": 2887
+  },
+  "summarize_parcel": {
+   "calls": 40,
+   "median_ms": 2206,
+   "p95_ms": 3129,
+   "max_ms": 3610
+  }
+ },
+ "inventions": [],
+ "crashes": [],
+ "cache_misses": [],
+ "per_case": [
+  {
+   "id": "sale-34172-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "34172000HL0365",
+     "expected": "34172000HL0365"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "34172000HL0365",
+     "expected": "34172000HL0365"
+    },
+    "dvf": {
+     "found": [
+      "2023-438361",
+      "2025-436287"
+     ],
+     "expected": [
+      "2023-438361",
+      "2025-436287"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UA 1-1-1"
+     ],
+     "expected": [
+      "UA 1-1-1"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-34172-2",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "34172000KY0007",
+     "expected": "34172000KY0007"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "34172000KY0007",
+     "expected": "34172000KY0007"
+    },
+    "dvf": {
+     "found": [
+      "2024-402111"
+     ],
+     "expected": [
+      "2024-402111"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UA 3-1"
+     ],
+     "expected": [
+      "UA 3-1"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-69383-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "69383000BD0005",
+     "expected": "69383000BD0005"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "69383000BD0005",
+     "expected": "69383000BD0005"
+    },
+    "dvf": {
+     "found": [
+      "2021-1153129",
+      "2025-887342"
+     ],
+     "expected": [
+      "2021-1153129",
+      "2025-887342"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UCe3a"
+     ],
+     "expected": [
+      "UCe3a"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 2
+    }
+   }
+  },
+  {
+   "id": "sale-33063-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "33063000MX0250",
+     "expected": "33063000MX0250"
+    },
+    "parcel_by_address": {
+     "ok": false,
+     "found": "33063000MX0249",
+     "expected": "33063000MX0250"
+    },
+    "dvf": {
+     "found": [
+      "2021-512887",
+      "2022-500876",
+      "2024-374645"
+     ],
+     "expected": [
+      "2021-512887",
+      "2022-500876",
+      "2024-374645"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UP1"
+     ],
+     "expected": [
+      "UP1"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-31555-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "31555823AB0306",
+     "expected": "31555823AB0306"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "31555823AB0306",
+     "expected": "31555823AB0306"
+    },
+    "dvf": {
+     "found": [
+      "2024-334765"
+     ],
+     "expected": [
+      "2024-334765"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UM1-3"
+     ],
+     "expected": [
+      "UM1-3"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-31555-2",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "31555831AO0050",
+     "expected": "31555831AO0050"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "31555831AO0050",
+     "expected": "31555831AO0050"
+    },
+    "dvf": {
+     "found": [
+      "2024-351049"
+     ],
+     "expected": [
+      "2024-351049"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UM6-3"
+     ],
+     "expected": [
+      "UM6-3"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-59350-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "59350000OY0326",
+     "expected": "59350000OY0326"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "59350000OY0326",
+     "expected": "59350000OY0326"
+    },
+    "dvf": {
+     "found": [
+      "2025-743123"
+     ],
+     "expected": [
+      "2025-743123"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UCM2.1.1"
+     ],
+     "expected": [
+      "UCM2.1.1"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-35238-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "35238000BV0645",
+     "expected": "35238000BV0645"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "35238000BV0645",
+     "expected": "35238000BV0645"
+    },
+    "dvf": {
+     "found": [
+      "2024-430995"
+     ],
+     "expected": [
+      "2024-430995"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UE1a"
+     ],
+     "expected": [
+      "UE1a"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-75111-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "75111000AP0059",
+     "expected": "75111000AP0059"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "75111000AP0059",
+     "expected": "75111000AP0059"
+    },
+    "dvf": {
+     "found": [
+      "2021-1716596",
+      "2021-1716880",
+      "2023-1349497",
+      "2025-1312021"
+     ],
+     "expected": [
+      "2021-1716596",
+      "2021-1716880",
+      "2023-1349497",
+      "2025-1312021"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UG"
+     ],
+     "expected": [
+      "UG"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 2
+    }
+   }
+  },
+  {
+   "id": "sale-13208-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "132088360K0120",
+     "expected": "132088360K0120"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "132088360K0120",
+     "expected": "132088360K0120"
+    },
+    "dvf": {
+     "found": [
+      "2025-138734"
+     ],
+     "expected": [
+      "2025-138734"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UBt2"
+     ],
+     "expected": [
+      "UBt2"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 2
+    }
+   }
+  },
+  {
+   "id": "sale-34057-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "34057000CV0052",
+     "expected": "34057000CV0052"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "34057000CV0052",
+     "expected": "34057000CV0052"
+    },
+    "dvf": {
+     "found": [
+      "2025-436260"
+     ],
+     "expected": [
+      "2025-436260"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UC 3-2"
+     ],
+     "expected": [
+      "UC 3-2"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-33281-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "33281000CR0045",
+     "expected": "33281000CR0045"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "33281000CR0045",
+     "expected": "33281000CR0045"
+    },
+    "dvf": {
+     "found": [
+      "2025-395190"
+     ],
+     "expected": [
+      "2025-395190"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UM6"
+     ],
+     "expected": [
+      "UM6"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-31069-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "31069000AW0443",
+     "expected": "31069000AW0443"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "31069000AW0443",
+     "expected": "31069000AW0443"
+    },
+    "dvf": {
+     "found": [
+      "2025-363240"
+     ],
+     "expected": [
+      "2025-363240"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UM7"
+     ],
+     "expected": [
+      "UM7"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-35051-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "35051000AT0168",
+     "expected": "35051000AT0168"
+    },
+    "parcel_by_address": {
+     "ok": false,
+     "found": "35051000AT0169",
+     "expected": "35051000AT0168"
+    },
+    "dvf": {
+     "found": [
+      "2024-442410"
+     ],
+     "expected": [
+      "2024-442410"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UE1a"
+     ],
+     "expected": [
+      "UE1a"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-59009-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "59009000PK0556",
+     "expected": "59009000PK0556"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "59009000PK0556",
+     "expected": "59009000PK0556"
+    },
+    "dvf": {
+     "found": [
+      "2024-681782"
+     ],
+     "expected": [
+      "2024-681782"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UCA3.1"
+     ],
+     "expected": [
+      "UCA3.1"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-69029-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "690290000F0864",
+     "expected": "690290000F0864"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "690290000F0864",
+     "expected": "690290000F0864"
+    },
+    "dvf": {
+     "found": [
+      "2025-889848"
+     ],
+     "expected": [
+      "2025-889848"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "URi2b"
+     ],
+     "expected": [
+      "URi2b"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-48092-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "480920000C1332",
+     "expected": "480920000C1332"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "480920000C1332",
+     "expected": "480920000C1332"
+    },
+    "dvf": {
+     "found": [
+      "2024-587555"
+     ],
+     "expected": [
+      "2024-587555"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "Uc"
+     ],
+     "expected": [
+      "Uc"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-48092-2",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "480920000A1315",
+     "expected": "480920000A1315"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "480920000A1315",
+     "expected": "480920000A1315"
+    },
+    "dvf": {
+     "found": [
+      "2024-586246"
+     ],
+     "expected": [
+      "2024-586246"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "Uc"
+     ],
+     "expected": [
+      "Uc"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-48080-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "48080000AL0522",
+     "expected": "48080000AL0522"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "48080000AL0522",
+     "expected": "48080000AL0522"
+    },
+    "dvf": {
+     "found": [
+      "2025-622136"
+     ],
+     "expected": [
+      "2025-622136"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "Ua"
+     ],
+     "expected": [
+      "Ua"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-23008-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "23008000AI0366",
+     "expected": "23008000AI0366"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "23008000AI0366",
+     "expected": "23008000AI0366"
+    },
+    "dvf": {
+     "found": [
+      "2025-251193"
+     ],
+     "expected": [
+      "2025-251193"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "Ub"
+     ],
+     "expected": [
+      "Ub"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-55122-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "55122000AB0089",
+     "expected": "55122000AB0089"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "55122000AB0089",
+     "expected": "55122000AB0089"
+    },
+    "dvf": {
+     "found": [
+      "2024-655736"
+     ],
+     "expected": [
+      "2024-655736"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UAa"
+     ],
+     "expected": [
+      "UAa"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-34274-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "34274000BP0009",
+     "expected": "34274000BP0009"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "34274000BP0009",
+     "expected": "34274000BP0009"
+    },
+    "dvf": {
+     "found": [
+      "2025-436426"
+     ],
+     "expected": [
+      "2025-436426"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UE2"
+     ],
+     "expected": [
+      "UE2"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "sale-23030-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "23030000AZ0378",
+     "expected": "23030000AZ0378"
+    },
+    "parcel_by_address": {
+     "ok": false,
+     "found": "23030000AZ0379",
+     "expected": "23030000AZ0378"
+    },
+    "dvf": {
+     "found": [
+      "2025-252613"
+     ],
+     "expected": [
+      "2025-252613"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UA"
+     ],
+     "expected": [
+      "UA"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 28,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 0
+    }
+   }
+  },
+  {
+   "id": "sale-55463-1",
+   "kind": "sale",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "55463000AB0315",
+     "expected": "55463000AB0315"
+    },
+    "parcel_by_address": {
+     "ok": false,
+     "found": "55463000AB0314",
+     "expected": "55463000AB0315"
+    },
+    "dvf": {
+     "found": [
+      "2025-694028"
+     ],
+     "expected": [
+      "2025-694028"
+     ]
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UA"
+     ],
+     "expected": [
+      "UA"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "public-34172",
+   "kind": "public_building",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "34172000DS0599",
+     "expected": "34172000DS0599"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "34172000DS0599",
+     "expected": "34172000DS0599"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UB 1-2-a"
+     ],
+     "expected": [
+      "UB 1-2-a"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "public-69383",
+   "kind": "public_building",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "69383000AE0065",
+     "expected": "69383000AE0065"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "69383000AE0065",
+     "expected": "69383000AE0065"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UCe2a"
+     ],
+     "expected": [
+      "UCe2a"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 2
+    }
+   }
+  },
+  {
+   "id": "public-33063",
+   "kind": "public_building",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "33063000KE0112",
+     "expected": "33063000KE0112"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "33063000KE0112",
+     "expected": "33063000KE0112"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_label": {
+     "skipped": "WFS returned no zone at the truth point"
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 28,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 0
+    }
+   }
+  },
+  {
+   "id": "public-31555",
+   "kind": "public_building",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "31555819AB0001",
+     "expected": "31555819AB0001"
+    },
+    "parcel_by_address": {
+     "ok": false,
+     "found": null,
+     "expected": "31555819AB0001"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "PSMV"
+     ],
+     "expected": [
+      "PSMV"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 28,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 0
+    }
+   }
+  },
+  {
+   "id": "public-59350",
+   "kind": "public_building",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "59350000TR0007",
+     "expected": "59350000TR0007"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "59350000TR0007",
+     "expected": "59350000TR0007"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UCM1.1.1"
+     ],
+     "expected": [
+      "UCM1.1.1"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 28,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 0
+    }
+   }
+  },
+  {
+   "id": "public-35238",
+   "kind": "public_building",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "35238000AC0526",
+     "expected": "35238000AC0526"
+    },
+    "parcel_by_address": {
+     "ok": false,
+     "found": "35238000AC0530",
+     "expected": "35238000AC0526"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "psmv"
+     ],
+     "expected": [
+      "psmv"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "public-13208",
+   "kind": "public_building",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "132088430N0001",
+     "expected": "132088430N0001"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "132088430N0001",
+     "expected": "132088430N0001"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UQP"
+     ],
+     "expected": [
+      "UQP"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 28,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "public-75111",
+   "kind": "public_building",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "75111000BL0092",
+     "expected": "75111000BL0092"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "75111000BL0092",
+     "expected": "75111000BL0092"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UG"
+     ],
+     "expected": [
+      "UG"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 2
+    }
+   }
+  },
+  {
+   "id": "notcovered-67482-1",
+   "kind": "not_covered",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "67482000DI0120",
+     "expected": "67482000DI0120"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "67482000DI0120",
+     "expected": "67482000DI0120"
+    },
+    "dvf_not_covered": true,
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "UD1"
+     ],
+     "expected": [
+      "UD1"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 27,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [
+      "not_covered"
+     ],
+     "warnings": 0
+    }
+   }
+  },
+  {
+   "id": "notcovered-67482-2",
+   "kind": "not_covered",
+   "checks": {
+    "geocoding": true,
+    "parcel_by_point": {
+     "ok": true,
+     "found": "67482000640001",
+     "expected": "67482000640001"
+    },
+    "parcel_by_address": {
+     "ok": true,
+     "found": "67482000640001",
+     "expected": "67482000640001"
+    },
+    "dvf_not_covered": true,
+    "zoning_label": {
+     "ok": true,
+     "found": [
+      "US1"
+     ],
+     "expected": [
+      "US1"
+     ]
+    },
+    "summary": {
+     "ok": true,
+     "sourced_fields": 28,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [
+      "not_covered"
+     ],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "rnu-48167",
+   "kind": "rnu_commune",
+   "checks": {
+    "parcel_by_point": {
+     "ok": true,
+     "found": "481670000A0439",
+     "expected": "481670000A0439"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_rnu": true,
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "rnu-48149",
+   "kind": "rnu_commune",
+   "checks": {
+    "parcel_by_point": {
+     "ok": true,
+     "found": "481490000A0035",
+     "expected": "481490000A0035"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_rnu": true,
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "rnu-48054",
+   "kind": "rnu_commune",
+   "checks": {
+    "parcel_by_point": {
+     "ok": true,
+     "found": "480540000A0565",
+     "expected": "480540000A0565"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_rnu": true,
+    "summary": {
+     "ok": true,
+     "sourced_fields": 29,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 1
+    }
+   }
+  },
+  {
+   "id": "rnu-48091",
+   "kind": "rnu_commune",
+   "checks": {
+    "parcel_by_point": {
+     "ok": true,
+     "found": "480910000D0174",
+     "expected": "480910000D0174"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_rnu": true,
+    "summary": {
+     "ok": true,
+     "sourced_fields": 28,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 0
+    }
+   }
+  },
+  {
+   "id": "rnu-23055",
+   "kind": "rnu_commune",
+   "checks": {
+    "parcel_by_point": {
+     "ok": true,
+     "found": "230550000A0600",
+     "expected": "230550000A0600"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_rnu": true,
+    "summary": {
+     "ok": true,
+     "sourced_fields": 28,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 0
+    }
+   }
+  },
+  {
+   "id": "rnu-55055",
+   "kind": "rnu_commune",
+   "checks": {
+    "parcel_by_point": {
+     "ok": true,
+     "found": "55055000ZB0014",
+     "expected": "55055000ZB0014"
+    },
+    "dvf": {
+     "found": [],
+     "expected": []
+    },
+    "zoning_rnu": true,
+    "summary": {
+     "ok": true,
+     "sourced_fields": 28,
+     "nulls_without_reason": [],
+     "unsourced_leaves": [],
+     "errors": [],
+     "warnings": 0
+    }
+   }
+  }
+ ]
+}
