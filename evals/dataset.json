@@ -1,0 +1,847 @@
+{
+ "version": "2026-10-11",
+ "description": "40 public parcels in 12 departments, urban, periurban and rural. 24 with at least one DVF sale, 14 without (public buildings and town halls), 2 in a department DVF does not cover, 6 in communes without a digitised planning document (RNU). None belongs to the author or his family. Expected values are recorded by evals/truth/record.py from official open data.",
+ "offline_subset": "cases with offline=true have their upstream responses recorded under evals/recorded and run in CI without network",
+ "cases": [
+  {
+   "id": "sale-34172-1",
+   "kind": "sale",
+   "category": "urban",
+   "department": "34",
+   "insee": "34172",
+   "commune": "Montpellier",
+   "input": {
+    "address": "1 QUAI DE SAUVAGE 34070 Montpellier",
+    "lon": 3.882714,
+    "lat": 43.605685
+   },
+   "expected": {
+    "parcel_id": "34172000HL0365",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-34172-2",
+   "kind": "sale",
+   "category": "urban",
+   "department": "34",
+   "insee": "34172",
+   "commune": "Montpellier",
+   "input": {
+    "address": "14 RTE DE LODEVE 34080 Montpellier",
+    "lon": 3.829469,
+    "lat": 43.614795
+   },
+   "expected": {
+    "parcel_id": "34172000KY0007",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-69383-1",
+   "kind": "sale",
+   "category": "urban",
+   "department": "69",
+   "insee": "69383",
+   "commune": "Lyon 3e",
+   "input": {
+    "address": "24 RUE DU DAUPHINE 69003 Lyon 3e Arrondissement",
+    "lon": 4.865446,
+    "lat": 45.750958
+   },
+   "expected": {
+    "parcel_id": "69383000BD0005",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-33063-1",
+   "kind": "sale",
+   "category": "urban",
+   "department": "33",
+   "insee": "33063",
+   "commune": "Bordeaux",
+   "input": {
+    "address": "13 RUE PASTEUR 33200 Bordeaux",
+    "lon": -0.599845,
+    "lat": 44.845417
+   },
+   "expected": {
+    "parcel_id": "33063000MX0250",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-31555-1",
+   "kind": "sale",
+   "category": "urban",
+   "department": "31",
+   "insee": "31555",
+   "commune": "Toulouse",
+   "input": {
+    "address": "7 RUE DE COULMIERS 31000 Toulouse",
+    "lon": 1.442388,
+    "lat": 43.612724
+   },
+   "expected": {
+    "parcel_id": "31555823AB0306",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-31555-2",
+   "kind": "sale",
+   "category": "urban",
+   "department": "31",
+   "insee": "31555",
+   "commune": "Toulouse",
+   "input": {
+    "address": "25 RUE D'ORADOUR SUR GLANE 31200 Toulouse",
+    "lon": 1.454511,
+    "lat": 43.627698
+   },
+   "expected": {
+    "parcel_id": "31555831AO0050",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-59350-1",
+   "kind": "sale",
+   "category": "urban",
+   "department": "59",
+   "insee": "59350",
+   "commune": "Lille",
+   "input": {
+    "address": "30 RUE LAMARTINE 59000 Lille",
+    "lon": 3.063641,
+    "lat": 50.620564
+   },
+   "expected": {
+    "parcel_id": "59350000OY0326",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-35238-1",
+   "kind": "sale",
+   "category": "urban",
+   "department": "35",
+   "insee": "35238",
+   "commune": "Rennes",
+   "input": {
+    "address": "66 RUE DU GENERAL MARGUERITTE 35000 Rennes",
+    "lon": -1.679269,
+    "lat": 48.097727
+   },
+   "expected": {
+    "parcel_id": "35238000BV0645",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-75111-1",
+   "kind": "sale",
+   "category": "urban",
+   "department": "75",
+   "insee": "75111",
+   "commune": "Paris 11e",
+   "input": {
+    "address": "31 RUE SAINT SEBASTIEN 75011 Paris 11e Arrondissement",
+    "lon": 2.370284,
+    "lat": 48.861573
+   },
+   "expected": {
+    "parcel_id": "75111000AP0059",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-13208-1",
+   "kind": "sale",
+   "category": "urban",
+   "department": "13",
+   "insee": "13208",
+   "commune": "Marseille 8e",
+   "input": {
+    "address": "32 BD JOACHIM ELIE VEZIEN 13008 Marseille 8e Arrondissement",
+    "lon": 5.377495,
+    "lat": 43.250074
+   },
+   "expected": {
+    "parcel_id": "132088360K0120",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-34057-1",
+   "kind": "sale",
+   "category": "periurban",
+   "department": "34",
+   "insee": "34057",
+   "commune": "Castelnau-le-Lez",
+   "input": {
+    "address": "3 RUE DU MARECHAL BERNADOTTE 34170 Castelnau-le-Lez",
+    "lon": 3.924654,
+    "lat": 43.641899
+   },
+   "expected": {
+    "parcel_id": "34057000CV0052",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-33281-1",
+   "kind": "sale",
+   "category": "periurban",
+   "department": "33",
+   "insee": "33281",
+   "commune": "Merignac",
+   "input": {
+    "address": "25 RUE D ALGER 33700 Mérignac",
+    "lon": -0.621774,
+    "lat": 44.822593
+   },
+   "expected": {
+    "parcel_id": "33281000CR0045",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-31069-1",
+   "kind": "sale",
+   "category": "periurban",
+   "department": "31",
+   "insee": "31069",
+   "commune": "Blagnac",
+   "input": {
+    "address": "2 IMP DES JASMINS 31700 Blagnac",
+    "lon": 1.395406,
+    "lat": 43.63993
+   },
+   "expected": {
+    "parcel_id": "31069000AW0443",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-35051-1",
+   "kind": "sale",
+   "category": "periurban",
+   "department": "35",
+   "insee": "35051",
+   "commune": "Cesson-Sevigne",
+   "input": {
+    "address": "15 RUE DU CHAMP DU MOULIN 35510 Cesson-Sévigné",
+    "lon": -1.614176,
+    "lat": 48.113063
+   },
+   "expected": {
+    "parcel_id": "35051000AT0168",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-59009-1",
+   "kind": "sale",
+   "category": "periurban",
+   "department": "59",
+   "insee": "59009",
+   "commune": "Villeneuve-d'Ascq",
+   "input": {
+    "address": "66 RUE JEAN BAPTISTE LEBAS 59493 Villeneuve-d'Ascq",
+    "lon": 3.160873,
+    "lat": 50.613767
+   },
+   "expected": {
+    "parcel_id": "59009000PK0556",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-69029-1",
+   "kind": "sale",
+   "category": "periurban",
+   "department": "69",
+   "insee": "69029",
+   "commune": "Bron",
+   "input": {
+    "address": "54 RUE DE LA MARNE 69500 Bron",
+    "lon": 4.913923,
+    "lat": 45.74225
+   },
+   "expected": {
+    "parcel_id": "690290000F0864",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-48092-1",
+   "kind": "sale",
+   "category": "rural",
+   "department": "48",
+   "insee": "48092",
+   "commune": "Marvejols",
+   "input": {
+    "address": "8 CHE DU COUVENT 48100 Marvejols",
+    "lon": 3.28752,
+    "lat": 44.552621
+   },
+   "expected": {
+    "parcel_id": "480920000C1332",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-48092-2",
+   "kind": "sale",
+   "category": "rural",
+   "department": "48",
+   "insee": "48092",
+   "commune": "Marvejols",
+   "input": {
+    "address": "13 CHE DU LIGNON 48100 Marvejols",
+    "lon": 3.289753,
+    "lat": 44.567012
+   },
+   "expected": {
+    "parcel_id": "480920000A1315",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-48080-1",
+   "kind": "sale",
+   "category": "rural",
+   "department": "48",
+   "insee": "48080",
+   "commune": "Langogne",
+   "input": {
+    "address": "54 RUE HAUTE 48300 Langogne",
+    "lon": 3.852393,
+    "lat": 44.726505
+   },
+   "expected": {
+    "parcel_id": "48080000AL0522",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-23008-1",
+   "kind": "sale",
+   "category": "rural",
+   "department": "23",
+   "insee": "23008",
+   "commune": "Aubusson",
+   "input": {
+    "address": "12 RUE PIERRE D AUBUSSON 23200 Aubusson",
+    "lon": 2.16457,
+    "lat": 45.952379
+   },
+   "expected": {
+    "parcel_id": "23008000AI0366",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-55122-1",
+   "kind": "sale",
+   "category": "rural",
+   "department": "55",
+   "insee": "55122",
+   "commune": "Commercy",
+   "input": {
+    "address": "35 PL CHARLES DE GAULLE 55200 Commercy",
+    "lon": 5.593745,
+    "lat": 48.76199
+   },
+   "expected": {
+    "parcel_id": "55122000AB0089",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-34274-1",
+   "kind": "sale",
+   "category": "rural",
+   "department": "34",
+   "insee": "34274",
+   "commune": "Saint-Martin-de-Londres",
+   "input": {
+    "address": "135 CHE DE CAMBOUNET 34380 Saint-Martin-de-Londres",
+    "lon": 3.725028,
+    "lat": 43.799948
+   },
+   "expected": {
+    "parcel_id": "34274000BP0009",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-23030-1",
+   "kind": "sale",
+   "category": "rural",
+   "department": "23",
+   "insee": "23030",
+   "commune": "Bourganeuf",
+   "input": {
+    "address": "39 RUE DE VERDUN 23400 Bourganeuf",
+    "lon": 1.75378,
+    "lat": 45.953272
+   },
+   "expected": {
+    "parcel_id": "23030000AZ0378",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "sale-55463-1",
+   "kind": "sale",
+   "category": "rural",
+   "department": "55",
+   "insee": "55463",
+   "commune": "Saint-Mihiel",
+   "input": {
+    "address": "5 RUE DU FOUR 55300 Saint-Mihiel",
+    "lon": 5.542105,
+    "lat": 48.890749
+   },
+   "expected": {
+    "parcel_id": "55463000AB0315",
+    "dvf_covered": true,
+    "has_sales": true,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "parcel and address taken from a DVF row; coordinates are the geo-dvf parcel position"
+  },
+  {
+   "id": "public-34172",
+   "kind": "public_building",
+   "category": "urban",
+   "department": "34",
+   "insee": "34172",
+   "commune": "Montpellier",
+   "input": {
+    "address": "1 Place Georges Freche 34070 Montpellier",
+    "lon": 3.896549,
+    "lat": 43.598842
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+  },
+  {
+   "id": "public-69383",
+   "kind": "public_building",
+   "category": "urban",
+   "department": "69",
+   "insee": "69383",
+   "commune": "Lyon 3e",
+   "input": {
+    "address": "18 Rue Francois Garcin 69003 Lyon",
+    "lon": 4.849571,
+    "lat": 45.760283
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+  },
+  {
+   "id": "public-33063",
+   "kind": "public_building",
+   "category": "urban",
+   "department": "33",
+   "insee": "33063",
+   "commune": "Bordeaux",
+   "input": {
+    "address": "Place Pey Berland 33000 Bordeaux",
+    "lon": -0.577233,
+    "lat": 44.837654
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+  },
+  {
+   "id": "public-31555",
+   "kind": "public_building",
+   "category": "urban",
+   "department": "31",
+   "insee": "31555",
+   "commune": "Toulouse",
+   "input": {
+    "address": "Place du Capitole 31000 Toulouse",
+    "lon": 1.443054,
+    "lat": 43.604354
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+  },
+  {
+   "id": "public-59350",
+   "kind": "public_building",
+   "category": "urban",
+   "department": "59",
+   "insee": "59350",
+   "commune": "Lille",
+   "input": {
+    "address": "Place Augustin Laurent 59800 Lille",
+    "lon": 3.070892,
+    "lat": 50.630925
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+  },
+  {
+   "id": "public-35238",
+   "kind": "public_building",
+   "category": "urban",
+   "department": "35",
+   "insee": "35238",
+   "commune": "Rennes",
+   "input": {
+    "address": "Place de la Mairie 35000 Rennes",
+    "lon": -1.679255,
+    "lat": 48.110964
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+  },
+  {
+   "id": "public-13208",
+   "kind": "public_building",
+   "category": "urban",
+   "department": "13",
+   "insee": "13208",
+   "commune": "Marseille 8e",
+   "input": {
+    "address": "125 Rue du Commandant Rolland 13008 Marseille",
+    "lon": 5.38159,
+    "lat": 43.26936
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+  },
+  {
+   "id": "public-75111",
+   "kind": "public_building",
+   "category": "urban",
+   "department": "75",
+   "insee": "75111",
+   "commune": "Paris 11e",
+   "input": {
+    "address": "12 Place Leon Blum 75011 Paris",
+    "lon": 2.379521,
+    "lat": 48.858501
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": true
+   },
+   "offline": false,
+   "note": "town hall or public building; point is the BAN position of the address, read 2026-10-11"
+  },
+  {
+   "id": "notcovered-67482-1",
+   "kind": "not_covered",
+   "category": "urban",
+   "department": "67",
+   "insee": "67482",
+   "commune": "Strasbourg",
+   "input": {
+    "address": "1 Parc de l'Etoile 67100 Strasbourg",
+    "lon": 7.753399,
+    "lat": 48.573465
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": false,
+    "has_sales": null,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "Bas-Rhin keeps the Livre foncier: DVF publishes nothing, the tool must say so"
+  },
+  {
+   "id": "notcovered-67482-2",
+   "kind": "not_covered",
+   "category": "urban",
+   "department": "67",
+   "insee": "67482",
+   "commune": "Strasbourg",
+   "input": {
+    "address": "9 Rue Brulee 67000 Strasbourg",
+    "lon": 7.750571,
+    "lat": 48.584747
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": false,
+    "has_sales": null,
+    "has_urban_document": true
+   },
+   "offline": true,
+   "note": "Bas-Rhin keeps the Livre foncier: DVF publishes nothing, the tool must say so"
+  },
+  {
+   "id": "rnu-48167",
+   "kind": "rnu_town_hall",
+   "category": "rural",
+   "department": "48",
+   "insee": "48167",
+   "commune": "Saint-Laurent-de-Veyres",
+   "input": {
+    "address": null,
+    "lon": 3.1288,
+    "lat": 44.7707
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": false
+   },
+   "offline": true,
+   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+  },
+  {
+   "id": "rnu-48149",
+   "kind": "rnu_town_hall",
+   "category": "rural",
+   "department": "48",
+   "insee": "48149",
+   "commune": "Sainte-Eulalie",
+   "input": {
+    "address": null,
+    "lon": 3.4671,
+    "lat": 44.791
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": false
+   },
+   "offline": true,
+   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+  },
+  {
+   "id": "rnu-48054",
+   "kind": "rnu_town_hall",
+   "category": "rural",
+   "department": "48",
+   "insee": "48054",
+   "commune": "Cubierettes",
+   "input": {
+    "address": null,
+    "lon": 3.7874,
+    "lat": 44.4602
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": false
+   },
+   "offline": true,
+   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+  },
+  {
+   "id": "rnu-48091",
+   "kind": "rnu_town_hall",
+   "category": "rural",
+   "department": "48",
+   "insee": "48091",
+   "commune": "Marchastel",
+   "input": {
+    "address": null,
+    "lon": 3.1063,
+    "lat": 44.651
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": false
+   },
+   "offline": true,
+   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+  },
+  {
+   "id": "rnu-23055",
+   "kind": "rnu_town_hall",
+   "category": "rural",
+   "department": "23",
+   "insee": "23055",
+   "commune": "Chatelard",
+   "input": {
+    "address": null,
+    "lon": 2.47,
+    "lat": 45.9637
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": false
+   },
+   "offline": true,
+   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+  },
+  {
+   "id": "rnu-55055",
+   "kind": "rnu_town_hall",
+   "category": "rural",
+   "department": "55",
+   "insee": "55055",
+   "commune": "Blanzee",
+   "input": {
+    "address": null,
+    "lon": 5.5371,
+    "lat": 49.1597
+   },
+   "expected": {
+    "parcel_id": null,
+    "dvf_covered": true,
+    "has_sales": false,
+    "has_urban_document": false
+   },
+   "offline": true,
+   "note": "commune under the RNU (no local planning document); point is the town hall position from geo.api.gouv.fr, read 2026-10-11"
+  }
+ ]
+}

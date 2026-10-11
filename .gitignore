@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Secrets and local configuration: never committed
+.env
+.env.*
+!.env.example
+keys.json
+usage.json
+*.sqlite
+
+# Runtime cache (the evals ship their own recorded cache under evals/recorded)
+.cache/
+
+# Truth recorder downloads (Etalab cadastre, DVF files), re-downloadable
+evals/truth/_downloads/
