@@ -34,8 +34,8 @@ faits suivants, rendus le 2026-10-12, chaque champ portant sa propre date de lec
 
 ```text
 Parcelle    Montpellier, section HL, numéro 365, 401 m2                  (IGN API Carto, cadastre)
-Ventes DVF  11/01/2023 : 275 000 EUR, appartement 4 pièces de 93 m2 avec dépendance
-            16/12/2025 : 116 000 EUR, appartement 2 pièces de 35 m2     (fichiers geo-dvf, data.gouv.fr)
+Ventes DVF  2 ventes enregistrées, en 2023 et en 2025 ; date, montant, type de bien et
+            surface rendus pour chacune, retirés de cet exemple      (fichiers geo-dvf, data.gouv.fr)
 Urbanisme   PLUi Montpellier Méditerranée Métropole, zone UA 1-1-1, « Tissu urbain de centralité
             de ville », hauteur maximale R+4 ; règlement nommé page 63, lien absent : null, raison
             écrite                                                        (Géoportail de l'urbanisme)
@@ -50,6 +50,10 @@ Risques     sismicité 2 faible, radon 1 faible, 36 arrêtés de catastrophe nat
 Chaque ligne ci-dessus est un champ de la réponse JSON avec sa source, sa date de lecture et, le cas
 échéant, sa raison d'absence. L'agent n'a rien à deviner : il rédige à partir de ces faits et peut
 citer leur origine.
+
+Le détail des ventes n'est pas recopié ici. Les conditions de réutilisation de DVF publiées sur
+data.gouv.fr excluent l'indexation des données par les moteurs de recherche externes, et cette page
+est indexée. Le serveur, lui, rend chaque vente à l'agent qui la demande.
 
 ## Ce que le serveur refuse
 

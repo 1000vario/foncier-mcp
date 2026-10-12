@@ -33,8 +33,8 @@ returned on 2026-10-12, each field carrying its own retrieval date:
 
 ```text
 Parcel      Montpellier, section HL, number 365, 401 m2                  (IGN API Carto, cadastre)
-DVF sales   2023-01-11: 275,000 EUR, 4-room flat of 93 m2 with an outbuilding
-            2025-12-16: 116,000 EUR, 2-room flat of 35 m2               (geo-dvf files, data.gouv.fr)
+DVF sales   2 recorded sales, in 2023 and in 2025; date, amount, property type and floor
+            area returned for each, left out of this example         (geo-dvf files, data.gouv.fr)
 Planning    PLUi Montpellier Mediterranee Metropole, zone UA 1-1-1, "Tissu urbain de centralite
             de ville", maximum height R+4; regulation named at page 63, link absent: null with a
             written reason                                                (Geoportail de l'urbanisme)
@@ -49,6 +49,10 @@ Risks       seismic zone 2 low, radon 1 low, 36 natural disaster orders, flood r
 Each line above is a field of the JSON response with its source, its retrieval date and, when
 empty, its reason. The agent has nothing to guess: it writes from these facts and can cite where
 each one comes from.
+
+The sale details are not copied here. The DVF reuse conditions published on data.gouv.fr rule out
+indexing of the data by external search engines, and this page is indexed. The server itself
+returns every sale to the agent that asks for it.
 
 ## What the server refuses
 
