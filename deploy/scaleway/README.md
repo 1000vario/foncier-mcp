@@ -52,15 +52,19 @@ foncier-mcp keys export > keys-export.json        # hashes and emails only, no k
    `FONCIER_MCP_FREE_DAILY_QUOTA=200`, secret environment `FONCIER_MCP_KEYS_JSON` from the
    export file.
    On an existing container it updates image, limits, variables and redeploys.
+   HTTPS connections only is set at creation; on an existing container it is read back and
+   switched on when off, so plain HTTP is redirected to HTTPS.
 3. Waits for status `ready` and reads the default endpoint. `FONCIER_MCP_ALLOWED_HOSTS` stays
    empty: DNS rebinding protection guards local servers, not a public endpoint behind a proxy.
-4. Checks `/health` on the default endpoint.
+4. Checks `/health` on the default endpoint, and that `http://` on it answers a redirect to
+   HTTPS rather than the service.
 5. Resolves the CNAME on 1.1.1.1 and 8.8.8.8. Missing: creates it through Cloudflare when a token
    is stored (proxy off, so the HTTP-01 challenge reaches Scaleway), otherwise prints it and stops.
 6. Registers the custom domain on the container and waits for `ready`. Scaleway must complete the
    challenge within three minutes; otherwise the domain is in `error` and the script prints
    `error_message`.
-7. Checks `https://foncier.guillaume-couillard.com/health` and prints a summary.
+7. Checks `https://foncier.guillaume-couillard.com/health`, the same redirect on
+   `http://foncier.guillaume-couillard.com`, and prints a summary.
 
 Nothing printed is secret: identifiers, statuses, hostnames.
 
@@ -72,7 +76,8 @@ Nothing printed is secret: identifiers, statuses, hostnames.
 3. Environment variables: `FONCIER_MCP_REQUIRE_API_KEY=1`, `PAID_TIER_ENABLED=false`,
    `FONCIER_MCP_FREE_DAILY_QUOTA=200`.
    Secret: `FONCIER_MCP_KEYS_JSON` = the content of `keys-export.json`.
-4. Wait for Ready, open `<default endpoint>/health`.
+4. Container, Security tab, HTTPS connections only: on.
+   Wait for Ready, open `<default endpoint>/health`.
 5. Cloudflare, DNS, add CNAME `foncier` pointing at the default endpoint host, proxy off.
 6. Container, Endpoints, Add custom domain `foncier.guillaume-couillard.com`, wait for Ready.
 

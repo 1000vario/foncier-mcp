@@ -9,7 +9,7 @@ CNAME; without it, it prints the record to create and stops until the name resol
 Prints identifiers, statuses and hostnames only, never a key.
 
 Steps: image publicly pullable, namespace, container (create or update and redeploy), wait for
-ready, /health on the default endpoint, CNAME check on 1.1.1.1 and 8.8.8.8, custom domain with
+ready, HTTPS connections only, /health on the default endpoint and plain HTTP redirected, CNAME check on 1.1.1.1 and 8.8.8.8, custom domain with
 its certificate, /health on the custom hostname, summary.
 
 .PARAMETER KeysJsonPath
@@ -176,6 +176,39 @@ function Test-Health([string]$Base, [string]$Label) {
     }
 }
 
+function Test-HttpsOnly([string]$TargetHost) {
+    $response = $null
+    try {
+        $request = [Net.HttpWebRequest]::Create("http://$TargetHost/health")
+        $request.AllowAutoRedirect = $false
+        $request.Timeout = 60000
+        $response = $request.GetResponse()
+    } catch [Net.WebException] {
+        $response = $_.Exception.Response
+        if ($null -eq $response) {
+            Note "http://$TargetHost not answering: $($_.Exception.Message)"
+            return 'unreachable'
+        }
+    }
+    try {
+        $code = [int]$response.StatusCode
+        $location = $response.Headers['Location']
+    } finally { $response.Close() }
+    if ($code -ge 300 -and $code -lt 400 -and "$location" -like 'https://*') {
+        Note "http://$TargetHost redirects to HTTPS ($code)"
+        return 'redirected'
+    }
+    Note "http://$TargetHost answers $code over plain HTTP: HTTPS connections only is off"
+    return 'plain_http_served'
+}
+
+function Get-HttpsOnly($Container) {
+    if ($null -eq $Container) { return $null }
+    $property = $Container.PSObject.Properties['https_connections_only']
+    if ($null -eq $property) { return $null }
+    return [bool]$property.Value
+}
+
 try {
     Step 'Credentials'
     $scw = Load-Store 'scaleway'
@@ -251,6 +284,7 @@ try {
         } else {
             $body = [ordered]@{ namespace_id = $namespace.id; name = $ContainerName; description = 'foncier-mcp streamable HTTP server' }
             foreach ($key in $spec.Keys) { $body[$key] = $spec[$key] }
+            $body.https_connections_only = $true
             $container = Scw 'Post' '/containers' $body
             Note "created container $($container.id)"
             $container = Wait-Status 'container' "/containers/$($container.id)" 600
@@ -268,6 +302,33 @@ try {
             $container = Wait-Status 'container' "/containers/$($container.id)" 600
         }
     }
+    # HTTPS only: set at creation; on an existing container the PATCH above leaves it untouched,
+    # so it is read back and switched on only when off. The API reference names the field
+    # https_connections_only on the container and at creation, https_connection_only on update:
+    # both are tried, the read-back decides.
+    $httpsOnly = Get-HttpsOnly $container
+    if ($null -ne $container -and $httpsOnly -ne $true) {
+        if ($DryRun) {
+            Note 'HTTPS connections only is off: would switch it on'
+        } else {
+            foreach ($field in @('https_connection_only', 'https_connections_only')) {
+                try {
+                    [void](Scw 'Patch' "/containers/$($container.id)" @{ $field = $true })
+                    $container = Wait-Status 'container' "/containers/$($container.id)" 600
+                } catch {
+                    Note "PATCH $field refused: $($_.Exception.Message)"
+                }
+                $httpsOnly = Get-HttpsOnly $container
+                if ($httpsOnly -eq $true) { break }
+            }
+            if ($httpsOnly -eq $true) { Note 'HTTPS connections only switched on' }
+            else { Note 'HTTPS connections only still off: switch it on in the console, Security tab' }
+        }
+    } elseif ($httpsOnly -eq $true) {
+        Note 'HTTPS connections only is on'
+    }
+    $Summary.https_connections_only = $httpsOnly
+
     $endpointHost = $null
     if ($null -ne $container) {
         $Summary.container_id = $container.id
@@ -278,7 +339,10 @@ try {
             $endpointHost = ([uri]$endpoint).Host
             $Summary.public_endpoint = $endpoint
             Note "endpoint $endpoint"
-            if ($container.status -eq 'ready') { $Summary.endpoint_health = Test-Health $endpoint 'endpoint' }
+            if ($container.status -eq 'ready') {
+                $Summary.endpoint_health = Test-Health $endpoint 'endpoint'
+                $Summary.endpoint_plain_http = Test-HttpsOnly $endpointHost
+            }
         }
     }
 
@@ -336,6 +400,7 @@ try {
             $Summary.domain_id = $domain.id
             $Summary.domain_status = $domain.status
             $Summary.custom_domain_health = Test-Health "https://$Hostname" $Hostname
+            $Summary.custom_domain_plain_http = Test-HttpsOnly $Hostname
         } elseif ($DryRun) {
             $domains = Scw 'Get' "/domains?container_id=$($container.id)" $null
             $domain = @($domains.domains | Where-Object { $_.hostname -eq $Hostname }) | Select-Object -First 1

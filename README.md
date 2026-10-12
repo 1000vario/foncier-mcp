@@ -184,7 +184,8 @@ args = ["--from", "git+https://github.com/1000vario/foncier-mcp", "foncier-mcp"]
 ### Tout client HTTP streamable
 
 Point d'entrée `https://HOST/mcp`, réponses JSON, sans état. La clé passe dans l'en-tête
-`x-api-key`. `GET /health` répond sans clé.
+`x-api-key`. `GET /health` répond sans clé. Appelez toujours en `https://` : une requête en
+`http://` est redirigée, mais sa clé a déjà voyagé en clair.
 
 L'instance hébergée est `https://foncier.guillaume-couillard.com/mcp` ; son `/health` dit si elle
 répond. La clé gratuite est envoyée par courriel, à la main, voir [Clés](#clés).
@@ -295,8 +296,14 @@ quota : le compteur ne s'applique qu'aux requêtes HTTP.
 
 ### Clés
 
-Pour obtenir une clé gratuite du service hébergé, ouvrez une issue « Clé gratuite » sur ce dépôt en
-indiquant le courriel qui doit la recevoir. L'auteur l'émet et l'envoie à la main.
+Pour obtenir une clé gratuite du service hébergé :
+
+1. Ouvrez une issue « Clé gratuite » sur ce dépôt, **sans y écrire de courriel ni aucune donnée
+   personnelle** : les issues sont publiques.
+2. Envoyez à l'auteur, par [message LinkedIn](https://www.linkedin.com/in/guillaume-couillard), le courriel qui doit
+   recevoir la clé, avec le numéro de l'issue.
+3. L'auteur émet la clé, l'envoie à ce courriel et ferme l'issue. La clé ne passe jamais par
+   GitHub ; elle fonctionne après le redéploiement qui suit son émission.
 
 ```bash
 foncier-mcp keys issue --email quelquun@example.org    # affiche la clé une seule fois

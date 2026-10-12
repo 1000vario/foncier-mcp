@@ -182,7 +182,8 @@ args = ["--from", "git+https://github.com/1000vario/foncier-mcp", "foncier-mcp"]
 ### Any streamable HTTP client
 
 Endpoint `https://HOST/mcp`, JSON responses, stateless. Send the key in the `x-api-key` header.
-`GET /health` answers without a key.
+`GET /health` answers without a key. Always call over `https://`: an `http://` request is
+redirected, but its key has already travelled in clear text.
 
 The hosted instance is `https://foncier.guillaume-couillard.com/mcp`; its `/health` says whether
 it is up. The free key is sent by email by hand, see [Keys](#keys).
@@ -289,8 +290,14 @@ quota: the counter only applies to HTTP requests.
 
 ### Keys
 
-To get a free key for the hosted service, open an issue titled "Free key" on this repository with
-the email that should receive it. The author issues it and sends it by hand.
+To get a free key for the hosted service:
+
+1. Open an issue titled "Free key" on this repository, **without any email address or other
+   personal data**: issues are public.
+2. Send the author, by [LinkedIn message](https://www.linkedin.com/in/guillaume-couillard), the email address that
+   should receive the key, with the issue number.
+3. The author issues the key, sends it to that address and closes the issue. The key never goes
+   through GitHub; it works after the redeploy that follows its issuance.
 
 ```bash
 foncier-mcp keys issue --email someone@example.org        # prints the key once
