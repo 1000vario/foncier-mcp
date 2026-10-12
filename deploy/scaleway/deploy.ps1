@@ -247,7 +247,7 @@ try {
     }
     if ($null -eq $container) {
         if ($DryRun) {
-            Note "would create container $ContainerName: $Image, port 8080, $MemoryMB MB, $MvCpu mvCPU, scale 0 to $MaxScale, public"
+            Note "would create container ${ContainerName}: $Image, port 8080, $MemoryMB MB, $MvCpu mvCPU, scale 0 to $MaxScale, public"
         } else {
             $body = [ordered]@{ namespace_id = $namespace.id; name = $ContainerName; description = 'foncier-mcp streamable HTTP server' }
             foreach ($key in $spec.Keys) { $body[$key] = $spec[$key] }
