@@ -13,6 +13,7 @@ dist/
 .env.*
 !.env.example
 keys.json
+keys-export.json
 usage.json
 *.sqlite
 
