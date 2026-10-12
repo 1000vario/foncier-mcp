@@ -2,36 +2,83 @@
 
 [![CI](https://github.com/1000vario/foncier-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/1000vario/foncier-mcp/actions/workflows/ci.yml)
 
-An [MCP](https://modelcontextprotocol.io) server that gives an AI agent French public land data
-for a parcel, an address or a point: cadastral parcel, recorded sales (DVF), planning zone and
-public-utility easements, energy performance certificates, natural and technological risks.
+English version: [README.en.md](README.en.md).
 
-Every value comes with its source and the date it was retrieved. When a source has nothing, the
-field is `null` with a written reason. The server never fills a gap with a guess.
+Vous posez à votre assistant une question sur un terrain ou un logement en France : quelle est la
+parcelle, à quel prix se sont vendus les biens voisins, dans quelle zone du plan local d'urbanisme,
+avec quel diagnostic de performance énergétique, sous quels risques naturels et industriels.
+Ces réponses existent, elles sont publiques et gratuites, mais dispersées entre six services de
+l'État, et un modèle de langage livré à lui-même les invente avec aplomb.
 
-- 7 typed, read-only tools, stdio and streamable HTTP transports.
-- Public, free sources only: Geoplateforme geocoder, IGN API Carto (cadastre, urbanism),
-  DVF files on data.gouv.fr, ADEME DPE, Georisques.
-- A reproducible eval suite: 40 public parcels, truth recorded from official open data, rates
-  published with their number of cases and date.
-- Free tier online (200 calls a day per key). A paid tier is designed but switched off, see below.
+foncier-mcp est un serveur [MCP](https://modelcontextprotocol.io) qui donne à l'agent l'accès
+direct à ces sources officielles : cadastre, demandes de valeurs foncières (DVF), Géoportail de
+l'urbanisme, observatoire DPE de l'ADEME, Géorisques. Chaque valeur rendue porte sa source et la
+date à laquelle elle a été lue. Quand une source n'a rien, le champ vaut `null` avec la raison
+écrite. Le serveur ne comble jamais un vide par une estimation.
 
-## Tools
+## Pour qui
 
-| Tool | Input (one locator) | Returns |
+- **Vous utilisez Claude Desktop, Claude Code ou Codex** et voulez poser vos questions sur une
+  adresse ou une parcelle, en français, avec des réponses sourcées : le serveur tourne sur votre
+  machine, sans compte ni clé, en dix minutes.
+- **Vous construisez un agent** pour l'immobilier, le conseil foncier ou le diagnostic : sept outils
+  typés, en lecture seule, un cache local daté, des erreurs typées, un jeu d'évaluation public.
+- **Vous exercez un métier du foncier** et un agent vous assiste : il lit les mêmes sources que vous
+  et dit quand il ne sait pas.
+
+## Ce que l'agent reçoit, sur un exemple
+
+Question posée à l'assistant : « Que sait-on de la parcelle 34172000HL0365 à Montpellier ? »
+L'agent appelle `summarize_parcel` et reçoit en 357 ms, le cache étant en partie chaud, les
+faits suivants, rendus le 2026-10-12, chaque champ portant sa propre date de lecture :
+
+```text
+Parcelle    Montpellier, section HL, numéro 365, 401 m2                  (IGN API Carto, cadastre)
+Ventes DVF  11/01/2023 : 275 000 EUR, appartement 4 pièces de 93 m2 avec dépendance
+            16/12/2025 : 116 000 EUR, appartement 2 pièces de 35 m2     (fichiers geo-dvf, data.gouv.fr)
+Urbanisme   PLUi Montpellier Méditerranée Métropole, zone UA 1-1-1, « Tissu urbain de centralité
+            de ville », hauteur maximale R+4 ; règlement nommé page 63, lien absent : null, raison
+            écrite                                                        (Géoportail de l'urbanisme)
+DPE         5 diagnostics à l'adresse BAN la plus proche, à 10 m ; le plus récent du 07/01/2026 :
+            classe D, GES B, appartement de 108,5 m2 ; avertissement : vérifier que c'est le bon
+            bâtiment                                                      (ADEME)
+Risques     sismicité 2 faible, radon 1 faible, 36 arrêtés de catastrophe naturelle, territoire à
+            risque d'inondation Montpellier-Lunel-Mauguio ; au point : argiles exposition moyenne,
+            aucun zonage inondation à 100 m, 10 installations classées à 1 km (Géorisques)
+```
+
+Chaque ligne ci-dessus est un champ de la réponse JSON avec sa source, sa date de lecture et, le cas
+échéant, sa raison d'absence. L'agent n'a rien à deviner : il rédige à partir de ces faits et peut
+citer leur origine.
+
+## Ce que le serveur refuse
+
+- Pas de prix au mètre carré interpolé ni d'estimation : l'outil rend les mutations enregistrées.
+- Pas de lien vers un règlement de zone tant que l'API le renvoie vide : le nom du fichier est
+  donné, le lien reste `null`.
+- Pas de DPE sans numéro de voie : l'outil dit qu'il ne sait pas.
+- Pas de valeur sans source, pas de `null` sans raison : l'évaluation compte chaque écart comme
+  une faute grave et échoue.
+
+Le service hébergé est gratuit, avec une clé par courriel et 200 appels par jour. Un niveau payant
+est conçu mais éteint, voir plus bas.
+
+## Outils
+
+| Outil | Entrée (un localisateur) | Rend |
 |---|---|---|
-| `geocode_address` | `address`, optional `limit` | best match, coordinates, INSEE code, candidates |
-| `find_parcel` | `address`, or `lon` + `lat`, or `parcel_id` | parcel id, commune, section, number, area, centroid, geometry; an address point on the road takes the nearest parcel within 10 m, with a warning |
-| `get_parcel_sales` | locator, optional `radius_m` (0 to 2000), `years` | DVF mutations on the parcel, and nearby when a radius is given, with price, date, buildings, land |
-| `get_zoning` | locator | planning document, zone(s) at the parcel, prescriptions, public-utility easements; RNU communes are reported as such |
-| `get_energy_diagnostics` | `address` or `ban_id` | DPE records for that address (existing and new buildings) |
-| `get_risks` | locator or `insee` | commune-level risks (inventory, seismic zone, radon, CatNat orders, flood territories) and point-level risks (clay shrink-swell, flood zoning, cavities, ground movements, classified installations) |
-| `summarize_parcel` | locator, optional `radius_m` | the four sections above for one parcel, each independent: a failing source is reported, the others still answer |
+| `geocode_address` | `address`, `limit` facultatif | meilleure correspondance, coordonnées, code INSEE, candidats |
+| `find_parcel` | `address`, ou `lon` + `lat`, ou `parcel_id` | identifiant de parcelle, commune, section, numéro, surface, centroïde, géométrie ; un point d'adresse sur la voie prend la parcelle la plus proche à moins de 10 m, avec un avertissement |
+| `get_parcel_sales` | localisateur, `radius_m` facultatif (0 à 2000), `years` | mutations DVF sur la parcelle, et alentour quand un rayon est donné, avec prix, date, bâtis, terrains |
+| `get_zoning` | localisateur | document d'urbanisme, zone(s) à la parcelle, prescriptions, servitudes d'utilité publique ; les communes au RNU sont signalées comme telles |
+| `get_energy_diagnostics` | `address` ou `ban_id` | diagnostics DPE à cette adresse (logements existants et neufs) |
+| `get_risks` | localisateur ou `insee` | risques de la commune (inventaire, zone sismique, radon, arrêtés CatNat, territoires à risque d'inondation) et risques au point (retrait-gonflement des argiles, zonage inondation, cavités, mouvements de terrain, installations classées) |
+| `summarize_parcel` | localisateur, `radius_m` facultatif | les quatre sections ci-dessus pour une parcelle, chacune indépendante : une source en panne est signalée, les autres répondent |
 
-A locator is exactly one of `parcel_id` (14 characters, for example `34172000DS0638`), `address`,
-or the pair `lon` + `lat` (WGS84). Giving two locators is refused.
+Un localisateur est exactement un de `parcel_id` (14 caractères, par exemple `34172000DS0638`),
+`address`, ou le couple `lon` + `lat` (WGS84). Deux localisateurs à la fois sont refusés.
 
-### Response shape
+### Forme des réponses
 
 ```json
 {
@@ -54,39 +101,40 @@ or the pair `lon` + `lat` (WGS84). Giving two locators is refused.
 }
 ```
 
-A field with no value is `{"value": null, "source": "...", "retrieved_at": null, "reason": "why"}`.
-Typed errors carry a `code`: `invalid_input`, `not_found`, `not_covered` (for example DVF in
-Alsace-Moselle), `source_unavailable` (retryable), `offline_cache_miss`, `unauthorized`,
+Un champ sans valeur s'écrit `{"value": null, "source": "...", "retrieved_at": null, "reason": "pourquoi"}`.
+Les erreurs typées portent un `code` : `invalid_input`, `not_found`, `not_covered` (par exemple DVF
+en Alsace-Moselle), `source_unavailable` (à réessayer), `offline_cache_miss`, `unauthorized`,
 `quota_exceeded`, `feature_disabled`.
 
-## Install in under ten minutes
+## Installation en moins de dix minutes
 
-Requirements: Python 3.11 or newer. Nothing else: no database, no API key for the public sources.
+Prérequis : Python 3.11 ou plus récent. Rien d'autre : ni base de données, ni clé pour les sources
+publiques.
 
-Option A, no clone, with [uv](https://docs.astral.sh/uv/):
+Option A, sans clone, avec [uv](https://docs.astral.sh/uv/) :
 
 ```bash
 uvx --from git+https://github.com/1000vario/foncier-mcp foncier-mcp tools
 ```
 
-Option B, with pip:
+Option B, avec pip :
 
 ```bash
 pip install git+https://github.com/1000vario/foncier-mcp
 foncier-mcp tools
 ```
 
-Option C, from a clone, for development:
+Option C, depuis un clone, pour développer :
 
 ```bash
 git clone https://github.com/1000vario/foncier-mcp
 cd foncier-mcp
-python -m venv .venv && . .venv/bin/activate   # Windows: .venv\Scripts\activate
+python -m venv .venv && . .venv/bin/activate   # Windows : .venv\Scripts\activate
 pip install -e ".[dev]"
 pytest -q
 ```
 
-Try one call without any MCP client:
+Un appel sans aucun client MCP :
 
 ```bash
 foncier-mcp call find_parcel --json '{"lon": 3.8946, "lat": 43.5986}'
@@ -94,7 +142,7 @@ foncier-mcp call find_parcel --json '{"lon": 3.8946, "lat": 43.5986}'
 
 ### Claude Desktop
 
-Add to `claude_desktop_config.json`:
+Dans `claude_desktop_config.json` :
 
 ```json
 {
@@ -113,7 +161,7 @@ Add to `claude_desktop_config.json`:
 claude mcp add foncier -- uvx --from git+https://github.com/1000vario/foncier-mcp foncier-mcp
 ```
 
-For the hosted HTTP service, once you have a key:
+Pour le service HTTP hébergé, une fois la clé reçue :
 
 ```bash
 claude mcp add --transport http foncier https://HOST/mcp --header "x-api-key: fm_..."
@@ -121,7 +169,7 @@ claude mcp add --transport http foncier https://HOST/mcp --header "x-api-key: fm
 
 ### Codex
 
-In `~/.codex/config.toml`:
+Dans `~/.codex/config.toml` :
 
 ```toml
 [mcp_servers.foncier]
@@ -129,152 +177,159 @@ command = "uvx"
 args = ["--from", "git+https://github.com/1000vario/foncier-mcp", "foncier-mcp"]
 ```
 
-### Any streamable HTTP client
+### Tout client HTTP streamable
 
-Endpoint `https://HOST/mcp`, JSON responses, stateless. Send the key in the `x-api-key` header.
-`GET /health` answers without a key.
+Point d'entrée `https://HOST/mcp`, réponses JSON, sans état. La clé passe dans l'en-tête
+`x-api-key`. `GET /health` répond sans clé.
 
-The hosted instance is `https://foncier.guillaume-couillard.com/mcp`; its `/health` says whether
-it is up. The free key is sent by email by hand, see [Keys](#keys).
+L'instance hébergée est `https://foncier.guillaume-couillard.com/mcp` ; son `/health` dit si elle
+répond. La clé gratuite est envoyée par courriel, à la main, voir [Clés](#clés).
 
-## Data sources
+## Sources de données
 
-All sources were read on 2026-10-11, including their documentation pages. The dates, limits and
-licences below are what was observed that day; they are not promises.
+Toutes les sources ont été lues le 2026-10-11, pages de documentation comprises. Les dates, limites
+et licences ci-dessous sont ce qui a été observé ce jour-là, pas des promesses.
 
-| Source | Used for | Access | Licence | Limits observed |
+| Source | Sert à | Accès | Licence | Limites observées |
 |---|---|---|---|---|
-| Geoplateforme geocoder (IGN), `data.geopf.fr/geocodage` | `geocode_address`, reverse geocoding for DPE | HTTP JSON, indexes address and parcel | Etalab Licence Ouverte 2.0 | `x-ratelimit-limit-second: 1`, `ratelimit-limit: 50`. The legacy `api-adresse.data.gouv.fr` is deprecated (sunset 2026-01-31) and is not used |
-| IGN API Carto, cadastre module | `find_parcel` | HTTP GeoJSON, by point or by INSEE + section + number | Licence Ouverte 2.0 (Etalab cadastre) | up to 1000 features per call |
-| IGN API Carto, GPU module (Geoportail de l'urbanisme) | `get_zoning` | `municipality`, `document`, `zone-urba`, `prescription-surf`, `assiette-sup-s`, `secteur-cc` | Licence Ouverte 2.0 | `urlfic` of the regulation files was empty on every zone read that day, so regulation links are `null` with the file name kept in `regulation_file` |
-| DVF, geo-dvf files, `files.data.gouv.fr/geo-dvf/latest/csv/{year}/communes/{dep}/{insee}.csv` | `get_parcel_sales` | one CSV per commune and year, 2021 to 2025, last modified 2026-05-18 | Licence Ouverte 2.0 | not covered: departments 57, 67, 68 (Livre foncier) and 976. The Cerema DVF+ API was unreachable on 2026-10-11, so the files are the primary and only DVF source |
-| ADEME, `data.ademe.fr/data-fair` datasets `dpe03existant`, `dpe02neuf` | `get_energy_diagnostics` | HTTP JSON, filtered on the BAN address id | Licence Ouverte 2.0 | 600 requests per 60 s anonymous; weekly refresh |
-| Georisques API v1, `georisques.gouv.fr/api/v1` | `get_risks` | `gaspar/risques`, `zonage_sismique`, `radon`, `gaspar/catnat`, `gaspar/tri`, `rga`, `tri_zonage`, `cavites`, `mvt`, `installations_classees` | Licence Ouverte 2.0 | the documentation page was geo-restricted that day; endpoints were read live. The `libelle_tri` field contains a mis-encoded dash which the server replaces |
+| Géocodeur de la Géoplateforme (IGN), `data.geopf.fr/geocodage` | `geocode_address`, géocodage inverse pour le DPE | HTTP JSON, index adresse et parcelle | Licence Ouverte 2.0 Etalab | `x-ratelimit-limit-second: 1`, `ratelimit-limit: 50`. L'ancien `api-adresse.data.gouv.fr` est déprécié (fin le 2026-01-31) et n'est pas utilisé |
+| IGN API Carto, module cadastre | `find_parcel` | HTTP GeoJSON, par point ou par INSEE + section + numéro | Licence Ouverte 2.0 (cadastre Etalab) | jusqu'à 1000 objets par appel |
+| IGN API Carto, module GPU (Géoportail de l'urbanisme) | `get_zoning` | `municipality`, `document`, `zone-urba`, `prescription-surf`, `assiette-sup-s`, `secteur-cc` | Licence Ouverte 2.0 | le champ `urlfic` des fichiers de règlement était vide sur chaque zone lue ce jour-là ; les liens de règlement valent `null`, le nom du fichier est gardé dans `regulation_file` |
+| DVF, fichiers geo-dvf, `files.data.gouv.fr/geo-dvf/latest/csv/{annee}/communes/{dep}/{insee}.csv` | `get_parcel_sales` | un CSV par commune et par année, 2021 à 2025, modifiés le 2026-05-18 | Licence Ouverte 2.0 | non couverts : départements 57, 67, 68 (Livre foncier) et 976. L'API DVF+ du Cerema était injoignable le 2026-10-11 ; les fichiers sont la source DVF unique |
+| ADEME, `data.ademe.fr/data-fair`, jeux `dpe03existant` et `dpe02neuf` | `get_energy_diagnostics` | HTTP JSON, filtré sur l'identifiant d'adresse BAN | Licence Ouverte 2.0 | 600 requêtes par 60 s en anonyme ; rafraîchissement hebdomadaire |
+| API Géorisques v1, `georisques.gouv.fr/api/v1` | `get_risks` | `gaspar/risques`, `zonage_sismique`, `radon`, `gaspar/catnat`, `gaspar/tri`, `rga`, `tri_zonage`, `cavites`, `mvt`, `installations_classees` | Licence Ouverte 2.0 | la page de documentation était géo-restreinte ce jour-là ; les points d'entrée ont été lus en direct. Le champ `libelle_tri` contient un tiret mal encodé que le serveur remplace |
 
-The server throttles itself per host and keeps a dated local cache (default seven days, under
-`~/.cache/foncier-mcp`). Each response says when the upstream data was fetched.
+Le serveur se limite lui-même par hôte et garde un cache local daté (sept jours par défaut, sous
+`~/.cache/foncier-mcp`). Chaque réponse dit quand la donnée amont a été lue.
 
-## Evals
+## Évals
 
 ```bash
-python evals/run.py --live       # every case against the public APIs, fresh cache
-python evals/run.py --offline    # replay of the 22 recorded cases, no network, runs in CI
+python evals/run.py --live       # chaque cas contre les API publiques, cache vide
+python evals/run.py --offline    # rejeu des 22 cas enregistrés, sans réseau, en CI
 ```
 
-The dataset ([evals/dataset.json](evals/dataset.json)) holds 40 public parcels in 12 departments
-(13, 23, 31, 33, 34, 35, 48, 55, 59, 67, 69, 75), urban, periurban and rural: 24 with at least
-one DVF sale, 14 without any (public buildings, town halls and village parcels, 6 of them in
-communes under the RNU with no digitised planning document), 2 in a department DVF does not
-cover. None belongs to the author or to his family.
+Le jeu de données ([evals/dataset.json](evals/dataset.json)) compte 40 parcelles publiques dans
+12 départements (13, 23, 31, 33, 34, 35, 48, 55, 59, 67, 69, 75), urbaines, périurbaines et
+rurales : 24 avec au moins une vente DVF, 14 sans aucune vente (bâtiments publics, mairies et
+parcelles de village, dont 6 en commune au RNU sans document d'urbanisme numérisé), 2 dans un
+département que DVF ne couvre pas. Aucune n'appartient à l'auteur ni à sa famille.
 
-The expected truth is recorded by [evals/truth/record.py](evals/truth/record.py) from official open
-data through a different path than the server: Etalab cadastre GeoJSON files with a pure Python
-point-in-polygon for the parcel, the geo-dvf CSV files for the mutations, the Geoplateforme WFS
-(`wfs_du:zone_urba`, `wfs_du:municipality`) for the zoning. Two honest limits: the DVF check reads
-the same files the server reads, so it measures parsing and grouping, not an independent register;
-and the zoning truth is taken at the parcel's representative point, so a parcel split between two
-zones can count as a miss.
+La vérité attendue est enregistrée par [evals/truth/record.py](evals/truth/record.py) depuis les
+données ouvertes officielles, par un autre chemin que le serveur : fichiers GeoJSON du cadastre
+Etalab avec un point-dans-polygone en Python pur pour la parcelle, fichiers CSV geo-dvf pour les
+mutations, WFS de la Géoplateforme (`wfs_du:zone_urba`, `wfs_du:municipality`) pour le zonage. Deux
+limites honnêtes : le contrôle DVF lit les mêmes fichiers que le serveur, il mesure donc le parsing
+et le regroupement, pas un registre indépendant ; la vérité de zonage est prise au point
+représentatif de la parcelle, une parcelle à cheval sur deux zones peut compter comme un échec.
 
-What is measured: geocoding (right commune and within 150 m of the parcel), parcel found from a
-point and from an address, DVF recall and precision per mutation, zero sale reported on parcels
-without sale, refusal in uncovered departments, zoning label, RNU reported without zoning, and the
-absence of invention: a value asserted where the sources hold none, a null without reason or a
-value without source counts as a grave failure and fails the run. Latency is reported per tool.
+Ce qui est mesuré : géocodage (bonne commune et moins de 150 m de la parcelle), parcelle trouvée
+depuis un point et depuis une adresse, rappel et précision DVF par mutation, zéro vente rendue sur
+les parcelles sans vente, refus dans les départements non couverts, libellé de zone, RNU annoncé
+sans zonage, et l'absence d'invention : une valeur affirmée là où les sources n'ont rien, un `null`
+sans raison ou une valeur sans source compte comme une faute grave et fait échouer la passe. La
+latence est rapportée par outil.
 
 <!-- EVAL_RESULTS_START -->
-Measured on 2026-10-11 against the live public APIs (`python evals/run.py --live`, fresh
-cache), 40 cases, truth recorded 2026-10-11T17:40:21+00:00, wall time
-206 s. Report: [evals/results/2026-10-11-live.md](evals/results/2026-10-11-live.md).
+Mesuré le 2026-10-11 contre les API publiques en direct (`python evals/run.py --live`, cache vide),
+40 cas, vérité enregistrée le 2026-10-11T17:40:21+00:00, durée totale 206 s. Rapport :
+[evals/results/2026-10-11-live.md](evals/results/2026-10-11-live.md).
 
-| Metric | Hit | Total | Rate |
+| Mesure | Réussis | Total | Taux |
 |---|---:|---:|---:|
-| geocode_address: right commune and within 150 m of the parcel | 34 | 34 | 100.0 % |
-| find_parcel from a point: Etalab cadastre parcel found | 40 | 40 | 100.0 % |
-| find_parcel from an address: expected parcel found | 28 | 34 | 82.3 % |
-| get_parcel_sales: recorded mutations returned (per mutation) | 31 | 31 | 100.0 % |
-| get_parcel_sales: returned mutations are recorded (per mutation) | 31 | 31 | 100.0 % |
-| get_parcel_sales: parcels without sale reported with zero sale | 14 | 14 | 100.0 % |
-| get_parcel_sales: uncovered department refused with not_covered | 2 | 2 | 100.0 % |
-| get_zoning: WFS zone label found among returned zones | 33 | 33 | 100.0 % |
-| get_zoning: RNU commune reported without zoning, with reason | 6 | 6 | 100.0 % |
-| summarize_parcel: envelope ok, every section answered or explained | 40 | 40 | 100.0 % |
+| geocode_address : bonne commune et moins de 150 m de la parcelle | 34 | 34 | 100,0 % |
+| find_parcel depuis un point : parcelle du cadastre Etalab trouvée | 40 | 40 | 100,0 % |
+| find_parcel depuis une adresse : parcelle attendue trouvée | 28 | 34 | 82,3 % |
+| get_parcel_sales : mutations enregistrées rendues (par mutation) | 31 | 31 | 100,0 % |
+| get_parcel_sales : mutations rendues bien enregistrées (par mutation) | 31 | 31 | 100,0 % |
+| get_parcel_sales : parcelles sans vente rendues avec zéro vente | 14 | 14 | 100,0 % |
+| get_parcel_sales : département non couvert refusé par not_covered | 2 | 2 | 100,0 % |
+| get_zoning : libellé de zone du WFS présent parmi les zones rendues | 33 | 33 | 100,0 % |
+| get_zoning : commune au RNU annoncée sans zonage, avec raison | 6 | 6 | 100,0 % |
+| summarize_parcel : enveloppe correcte, chaque section répondue ou expliquée | 40 | 40 | 100,0 % |
 
-Invented values: 0. Crashes outside typed errors: 0.
-`summarize_parcel` latency over 40 live calls: median 2206 ms, p95 3129 ms,
-max 3610 ms.
+Valeurs inventées : 0. Plantages hors erreurs typées : 0.
+Latence de `summarize_parcel` sur 40 appels en direct : médiane 2206 ms, p95 3129 ms,
+maximum 3610 ms.
 
-Misses on `find_parcel` from an address (6 of 34): `sale-33063-1` (neighbouring parcel); `sale-35051-1` (neighbouring parcel, same recorded sale); `sale-23030-1` (neighbouring parcel); `sale-55463-1` (neighbouring parcel); `public-31555` (open square, no parcel within 10 m, null returned with a reason); `public-35238` (neighbouring parcel).
-The BAN point lands inside, or nearest to, a neighbouring parcel, or in the middle of a square.
-The server returns what the point says, with the candidates in a warning, rather than
-guessing the intended parcel.
+Échecs de `find_parcel` depuis une adresse (6 sur 34) : `sale-33063-1` (parcelle voisine) ;
+`sale-35051-1` (parcelle voisine, même vente enregistrée) ; `sale-23030-1` (parcelle voisine) ;
+`sale-55463-1` (parcelle voisine) ; `public-31555` (place ouverte, aucune parcelle à moins de 10 m,
+`null` rendu avec une raison) ; `public-35238` (parcelle voisine). Le point BAN tombe dans la
+parcelle voisine, ou au plus près d'elle, ou au milieu d'une place. Le serveur rend ce que dit le
+point, avec les candidates en avertissement, plutôt que de deviner la parcelle voulue.
 
-The offline replay of the 22 recorded cases (`python evals/run.py --offline`, run in CI on
-every push) gave 13/16 on that metric and 100 % on the others, with
-0 invented values and 0 cache misses.
+Le rejeu hors ligne des 22 cas enregistrés (`python evals/run.py --offline`, lancé en CI à chaque
+push) a donné 13/16 sur cette mesure et 100 % sur les autres, avec 0 valeur inventée et 0 défaut de
+cache.
 <!-- EVAL_RESULTS_END -->
 
-Full reports with per-case detail are in [evals/results](evals/results). A weekly GitHub Action
-reruns the live suite and keeps its report as an artifact.
+Les rapports complets, cas par cas, sont dans [evals/results](evals/results). Une action GitHub
+hebdomadaire rejoue la passe en direct et garde son rapport en artefact.
 
-## Service tiers
+## Niveaux de service
 
-The hosted server serves two tiers from one code path:
+Le serveur hébergé sert deux niveaux depuis un seul code :
 
-| | Free | Paid (designed, switched off) |
+| | Gratuit | Payant (conçu, éteint) |
 |---|---|---|
-| Access | key by email, `x-api-key` header | key by email |
-| Quota | 200 calls a day | 5000 calls a day (`FONCIER_MCP_PAID_DAILY_QUOTA`) |
-| Tools | all 7, including `summarize_parcel` | the 7 tools plus `export_parcel_pdf` and `watch_parcel` |
-| Payment | none | none yet |
+| Accès | clé par courriel, en-tête `x-api-key` | clé par courriel |
+| Quota | 200 appels par jour | 5000 appels par jour (`FONCIER_MCP_PAID_DAILY_QUOTA`) |
+| Outils | les 7, dont `summarize_parcel` | les 7 plus `export_parcel_pdf` et `watch_parcel` |
+| Paiement | aucun | aucun pour l'instant |
 
-The counter and the tier check are implemented and tested. The paid tier is behind
-`PAID_TIER_ENABLED=false`: with the flag off, paid keys cannot be issued, paid keys that exist
-are served as free with a warning, and the two paid tools are not even listed. It stays off until
-a legal question (combining this activity with the author's employment contract) is settled, and
-the two paid tools have no implementation behind them yet. Turning the flag on is a decision for
-the author, not a deployment detail.
+Le compteur et le contrôle de niveau sont implémentés et testés. Le niveau payant est derrière
+`PAID_TIER_ENABLED=false` : drapeau éteint, aucune clé payante ne peut être émise, les clés
+payantes existantes sont servies comme gratuites avec un avertissement, et les deux outils payants
+ne sont même pas listés. Il reste éteint tant qu'une question juridique (le cumul de cette activité
+avec le contrat de travail de l'auteur) n'est pas réglée, et les deux outils payants n'ont encore
+aucune implémentation derrière eux. Allumer le drapeau est une décision de l'auteur, pas un détail
+de déploiement.
 
-Over stdio (Claude Desktop, Claude Code, Codex running the server locally) there is no key and no
-quota: the counter only applies to HTTP requests.
+En stdio (Claude Desktop, Claude Code, Codex lançant le serveur en local), il n'y a ni clé ni
+quota : le compteur ne s'applique qu'aux requêtes HTTP.
 
-### Keys
+### Clés
+
+Pour obtenir une clé gratuite du service hébergé, ouvrez une issue « Clé gratuite » sur ce dépôt en
+indiquant le courriel qui doit la recevoir. L'auteur l'émet et l'envoie à la main.
 
 ```bash
-foncier-mcp keys issue --email someone@example.org        # prints the key once
+foncier-mcp keys issue --email quelquun@example.org    # affiche la clé une seule fois
 foncier-mcp keys list
 foncier-mcp keys revoke fm_abcdefgh
-foncier-mcp keys export > keys-export.json                # hashes only, for FONCIER_MCP_KEYS_JSON
+foncier-mcp keys export > keys-export.json             # empreintes seules, pour FONCIER_MCP_KEYS_JSON
 ```
 
-Keys are stored hashed (SHA-256) in `FONCIER_MCP_KEYS_FILE`; daily usage in
-`FONCIER_MCP_USAGE_FILE`, reset at UTC midnight. The free key is sent by email by hand today.
+Les clés sont stockées hachées (SHA-256) dans `FONCIER_MCP_KEYS_FILE` ; l'usage du jour dans
+`FONCIER_MCP_USAGE_FILE`, remis à zéro à minuit UTC.
 
-A host without a persistent disk gets its keys through `FONCIER_MCP_KEYS_JSON`, the output of
-`keys export` placed in a secret environment variable. The store is then read-only: `issue` and
-`revoke` refuse, and a revocation is an export followed by a redeploy. The export holds hashes
-and emails, never a key.
+Un hôte sans disque persistant reçoit ses clés par `FONCIER_MCP_KEYS_JSON`, la sortie de
+`keys export` placée dans une variable d'environnement secrète. Le magasin est alors en lecture
+seule : `issue` et `revoke` refusent, et une révocation est un export suivi d'un redéploiement.
+L'export contient des empreintes et des courriels, jamais une clé.
 
-## Running the HTTP server
+## Lancer le serveur HTTP
 
 ```bash
 foncier-mcp serve --transport http --host 0.0.0.0 --port 8080
 ```
 
-Environment (see [.env.example](.env.example)):
+Environnement (voir [.env.example](.env.example)) :
 
-| Variable | Default | Meaning |
+| Variable | Défaut | Sens |
 |---|---|---|
-| `FONCIER_MCP_CACHE_DIR` | `~/.cache/foncier-mcp` | dated response cache |
-| `FONCIER_MCP_CACHE_TTL_HOURS` | `168` | cache lifetime |
-| `FONCIER_MCP_OFFLINE` | `0` | `1` answers from the cache only |
-| `FONCIER_MCP_REQUIRE_API_KEY` | `1` | HTTP requests need a key; stdio never does |
-| `FONCIER_MCP_KEYS_FILE`, `FONCIER_MCP_USAGE_FILE` | `~/.config/foncier-mcp/...` | key and usage stores |
-| `FONCIER_MCP_KEYS_JSON` | empty | output of `keys export` for a host without a disk; when set the key store is read-only and `FONCIER_MCP_KEYS_FILE` is ignored |
-| `FONCIER_MCP_FREE_DAILY_QUOTA` | `200` | free tier quota |
-| `PAID_TIER_ENABLED` | `false` | paid tier switch, see above |
-| `FONCIER_MCP_ALLOWED_HOSTS` | empty | comma-separated hosts for DNS-rebinding protection; empty accepts any host, which a deployment behind a proxy needs |
+| `FONCIER_MCP_CACHE_DIR` | `~/.cache/foncier-mcp` | cache de réponses daté |
+| `FONCIER_MCP_CACHE_TTL_HOURS` | `168` | durée de vie du cache |
+| `FONCIER_MCP_OFFLINE` | `0` | `1` répond depuis le cache seulement |
+| `FONCIER_MCP_REQUIRE_API_KEY` | `1` | les requêtes HTTP exigent une clé ; stdio jamais |
+| `FONCIER_MCP_KEYS_FILE`, `FONCIER_MCP_USAGE_FILE` | `~/.config/foncier-mcp/...` | magasins de clés et d'usage |
+| `FONCIER_MCP_KEYS_JSON` | vide | sortie de `keys export` pour un hôte sans disque ; quand elle est posée, le magasin de clés est en lecture seule et `FONCIER_MCP_KEYS_FILE` est ignoré |
+| `FONCIER_MCP_FREE_DAILY_QUOTA` | `200` | quota du niveau gratuit |
+| `PAID_TIER_ENABLED` | `false` | interrupteur du niveau payant, voir plus haut |
+| `FONCIER_MCP_ALLOWED_HOSTS` | vide | hôtes acceptés, séparés par des virgules, contre le DNS rebinding ; vide accepte tout hôte, ce qu'un déploiement derrière un mandataire exige |
 
-### Container
+### Conteneur
 
 ```bash
 docker build -t foncier-mcp .
@@ -282,98 +337,100 @@ docker run -p 8080:8080 -v foncier-data:/data foncier-mcp
 curl http://localhost:8080/health
 ```
 
-CI builds the image and checks `/health` on every push.
+La CI construit l'image et contrôle `/health` à chaque push.
 
-### Hosting, measured on 2026-10-11
+### Hébergement, mesuré le 2026-10-11
 
-Target: a European provider, France for the data locality. Prices read on scaleway.com that day,
-excluding VAT, Paris region:
+Cible : un hébergeur européen, en France pour la localité des données. Prix lus sur scaleway.com ce
+jour-là, hors taxes, région Paris :
 
-| Option | Monthly price read | Fit |
+| Option | Prix mensuel lu | Adéquation |
 |---|---|---|
-| Scaleway Serverless Containers | 0 EUR within the free allowance (400,000 GB-s and 200,000 vCPU-s a month), then 0.000002 EUR per GB-s and 0.00001 EUR per vCPU-s | the free tier of this service fits inside the allowance at 200 calls a day per key for a handful of keys |
-| Scaleway Instance STARDUST1-S | about 0.43 EUR | smallest VM, limited availability |
-| Scaleway Instance DEV1-S | about 6.55 EUR | comfortable for the container plus its cache |
-| Scaleway Instance PLAY2-PICO | about 10.42 EUR | alternative with newer hardware |
+| Scaleway Serverless Containers | 0 EUR dans la franchise (400 000 Go-s et 200 000 vCPU-s par mois), puis 0,000002 EUR par Go-s et 0,00001 EUR par vCPU-s | le niveau gratuit de ce service tient dans la franchise à 200 appels par jour et par clé pour une poignée de clés |
+| Scaleway Instance STARDUST1-S | environ 0,43 EUR | plus petite VM, disponibilité limitée |
+| Scaleway Instance DEV1-S | environ 6,55 EUR | confortable pour le conteneur et son cache |
+| Scaleway Instance PLAY2-PICO | environ 10,42 EUR | alternative sur matériel plus récent |
 
-Chosen: Serverless Containers in fr-par, 256 MB, one instance at most, scale to zero, behind
-`foncier.guillaume-couillard.com`. Worst case if someone keeps the single instance busy all month
-(31 days, 256 MB, 140 mvCPU set explicitly because Scaleway's default when the client sets
-nothing is 1000 mvCPU): about 2.3 EUR. The account, the payment method and the
-subdomain belong to the author.
+Choix : Serverless Containers à fr-par, 256 Mo, une instance au plus, zéro au repos, derrière
+`foncier.guillaume-couillard.com`. Pire cas si quelqu'un occupe l'instance unique tout le mois
+(31 jours, 256 Mo, 140 mvCPU fixés explicitement parce que le défaut de Scaleway quand le client ne
+fixe rien est 1000 mvCPU) : environ 2,3 EUR. Le compte, le moyen de paiement et le sous-domaine
+appartiennent à l'auteur.
 
-### Deployment
+### Déploiement
 
-The image is built by [publish-image.yml](.github/workflows/publish-image.yml) after a green CI
-run on `main` and pushed to `ghcr.io/1000vario/foncier-mcp:latest` (linux/amd64, public).
-Scaleway pulls it from there: no Scaleway registry, no Scaleway secret in GitHub.
+L'image est construite par [publish-image.yml](.github/workflows/publish-image.yml) après une CI
+verte sur `main` et poussée sur `ghcr.io/1000vario/foncier-mcp:latest` (linux/amd64, publique).
+Scaleway la tire de là : ni registre Scaleway, ni secret Scaleway dans GitHub.
 
-The author deploys from a Windows terminal with the scripts in [deploy/scaleway](deploy/scaleway):
+L'auteur déploie depuis un terminal Windows avec les scripts de [deploy/scaleway](deploy/scaleway) :
 
 ```powershell
-.\deploy\scaleway\install-credentials.ps1 -Provider scaleway     # asks for the key, stores it encrypted (DPAPI)
-.\deploy\scaleway\install-credentials.ps1 -Provider cloudflare   # optional, lets the script create the CNAME
+.\deploy\scaleway\install-credentials.ps1 -Provider scaleway     # demande la clé, la stocke chiffrée (DPAPI)
+.\deploy\scaleway\install-credentials.ps1 -Provider cloudflare   # facultatif, laisse le script créer le CNAME
 foncier-mcp keys export > keys-export.json
 .\deploy\scaleway\deploy.ps1 -KeysJsonPath .\keys-export.json
 ```
 
-`deploy.ps1` creates or updates the namespace and the container (port 8080, 256 MB, 140 mvCPU,
+`deploy.ps1` crée ou met à jour l'espace de noms et le conteneur (port 8080, 256 Mo, 140 mvCPU,
 min 0, max 1, public, `FONCIER_MCP_REQUIRE_API_KEY=1`, `PAID_TIER_ENABLED=false`,
-`FONCIER_MCP_KEYS_JSON` as a secret variable; `FONCIER_MCP_ALLOWED_HOSTS` stays empty because DNS
-rebinding protection guards local servers, not a public endpoint behind the provider's proxy),
-waits for `ready`, checks `/health` on the Scaleway endpoint, makes sure the CNAME
-`foncier.guillaume-couillard.com` points at that endpoint without proxy so that the HTTP-01
-challenge reaches Scaleway, registers the custom domain and waits for its certificate. It prints
-identifiers and statuses, never a key. The same steps by hand in the Scaleway console are in
-[deploy/scaleway/README.md](deploy/scaleway/README.md).
+`FONCIER_MCP_KEYS_JSON` en variable secrète ; `FONCIER_MCP_ALLOWED_HOSTS` reste vide parce que la
+protection contre le DNS rebinding vise un serveur local, pas un point d'entrée public derrière le
+mandataire de l'hébergeur), attend l'état `ready`, contrôle `/health` sur le point d'entrée
+Scaleway, s'assure que le CNAME `foncier.guillaume-couillard.com` pointe vers ce point d'entrée
+sans proxy pour que le défi HTTP-01 atteigne Scaleway, enregistre le domaine personnalisé et attend
+son certificat. Il affiche des identifiants et des états, jamais une clé. Les mêmes étapes à la
+main dans la console Scaleway sont dans [deploy/scaleway/README.md](deploy/scaleway/README.md).
 
-What this hosting does not give:
+Ce que cet hébergement ne donne pas :
 
-- No persistent disk. The cache and the usage counter live in the instance and vanish when it
-  scales to zero after about fifteen minutes without a request. The daily quota is therefore
-  enforced per warm instance: an upper bound on cost and abuse, not an exact daily count per key.
-  A durable counter would need Object Storage (Standard One Zone 0.00803 EUR per GB per month,
-  Multi-AZ 0.01606 EUR, read on 2026-10-11, no free storage allowance) and code that does not
-  exist yet.
-- Keys are read-only in the container. Issuing or revoking one is `keys issue` or `keys revoke`
-  on the author's machine, then `keys export` and `deploy.ps1` again.
-- Requests reach the public APIs from Scaleway's addresses with the per-host rate limiting of the
-  server; every caller shares it.
+- Pas de disque persistant. Le cache et le compteur d'usage vivent dans l'instance et disparaissent
+  quand elle descend à zéro après une quinzaine de minutes sans requête. Le quota journalier vaut
+  donc par instance chaude : une borne sur le coût et l'abus, pas un compte exact par clé et par
+  jour. Un compteur durable demanderait Object Storage (Standard One Zone 0,00803 EUR par Go et par
+  mois, Multi-AZ 0,01606 EUR, lus le 2026-10-11, sans franchise de stockage) et du code qui n'existe
+  pas encore.
+- Les clés sont en lecture seule dans le conteneur. Émettre ou révoquer, c'est `keys issue` ou
+  `keys revoke` sur la machine de l'auteur, puis `keys export` et `deploy.ps1` à nouveau.
+- Les requêtes atteignent les API publiques depuis les adresses de Scaleway avec la limitation par
+  hôte du serveur ; tous les appelants la partagent.
 
-## Security
+## Sécurité
 
-- No secret in the repository. Keys are hashed at rest. `.env` files are ignored.
-- The deployment scripts keep the provider keys encrypted with Windows DPAPI under the author's
-  profile, call the provider APIs over TLS and print statuses and identifiers only.
-- Before every push, the author runs a secret scan outside CI (`brain scan-secrets --repo`, a
-  local tool); CI runs lint, tests and the offline evals.
-- The server is read-only towards its sources and sends them nothing but the lookup parameters.
+- Aucun secret dans le dépôt. Les clés sont hachées au repos. Les fichiers `.env` sont ignorés.
+- Les scripts de déploiement gardent les clés de l'hébergeur chiffrées par Windows DPAPI sous le
+  profil de l'auteur, appellent les API en TLS et n'affichent que des états et des identifiants.
+- Avant chaque push, l'auteur lance un scan de secrets hors CI (`brain scan-secrets --repo`, un
+  outil local) ; la CI lance le lint, les tests et les évals hors ligne.
+- Le serveur est en lecture seule envers ses sources et ne leur envoie que les paramètres de
+  recherche.
 
-## Known limits
+## Limites connues
 
-- Paris, Lyon and Marseille: API Carto keys their parcels by the parent commune (75056, 69123,
-  13055) plus an arrondissement code, while the parcel id keeps the arrondissement INSEE code
-  (75111000AP0059). The server translates the lookup by id and reports the arrondissement
-  code, which is the one the DVF files and the GPU use. Georisques knows the Paris arrondissement
-  codes but not those of Lyon and Marseille: their commune-level risks are read for the parent
-  commune, and the response says so in a warning. Both found by the live evals on 2026-10-11.
-- Address points from the BAN often sit on the road axis, outside every parcel. `find_parcel`
-  then takes the nearest parcel within 10 m and says so in a warning that lists the
-  candidates. When the point lands inside a neighbouring parcel, the neighbour is returned:
-  the eval table counts those cases as misses.
-- The Geoplateforme reverse geocoder returns the nearest address, not the address inside the
-  parcel; `get_energy_diagnostics` through `summarize_parcel` only keeps a housenumber match within
-  30 m and otherwise says so.
-- Regulation PDFs of planning zones are named but not linked, because the GPU API returned empty
-  `urlfic` fields on the day of reading.
-- DVF publishes nothing for Alsace-Moselle (Livre foncier) and Mayotte; the tool answers
+- Paris, Lyon et Marseille : API Carto indexe leurs parcelles par la commune parente (75056, 69123,
+  13055) plus un code d'arrondissement, alors que l'identifiant de parcelle garde le code INSEE de
+  l'arrondissement (75111000AP0059). Le serveur traduit la recherche par identifiant et rend le code
+  d'arrondissement, celui que les fichiers DVF et le GPU utilisent. Géorisques connaît les codes
+  d'arrondissement de Paris mais pas ceux de Lyon et Marseille : leurs risques de commune sont lus
+  pour la commune parente, et la réponse le dit dans un avertissement. Les deux trouvés par les
+  évals en direct du 2026-10-11.
+- Les points d'adresse de la BAN sont souvent sur l'axe de la voie, hors de toute parcelle.
+  `find_parcel` prend alors la parcelle la plus proche à moins de 10 m et le dit dans un
+  avertissement qui liste les candidates. Quand le point tombe dans une parcelle voisine, c'est la
+  voisine qui est rendue : le tableau des évals compte ces cas comme des échecs.
+- Le géocodeur inverse de la Géoplateforme rend l'adresse la plus proche, pas l'adresse dans la
+  parcelle ; `get_energy_diagnostics` via `summarize_parcel` ne garde qu'une correspondance au
+  numéro à moins de 30 m et le dit sinon.
+- Les PDF de règlement des zones sont nommés mais pas liés, parce que l'API GPU a rendu des champs
+  `urlfic` vides le jour de la lecture.
+- DVF ne publie rien pour l'Alsace-Moselle (Livre foncier) ni Mayotte ; l'outil répond
   `not_covered`.
-- Georisques labels come as published, including occasional empty fields.
-- Rates in the eval table hold for the day they were measured; the public APIs change.
+- Les libellés Géorisques arrivent tels que publiés, avec des champs parfois vides.
+- Les taux du tableau d'évals valent pour le jour de la mesure ; les API publiques changent.
 
 ## Licence
 
-Code: MIT, see [LICENSE](LICENSE). Data returned by the server stays under its own licence,
-Etalab Licence Ouverte 2.0 for every source listed above, which requires naming the producer:
-IGN, DGFiP (DVF), ADEME, BRGM and the ministries behind Georisques, and the Geoportail de
-l'urbanisme contributors.
+Code : MIT, voir [LICENSE](LICENSE). Les données rendues par le serveur restent sous leur propre
+licence, Licence Ouverte 2.0 Etalab pour chaque source listée ci-dessus, qui impose de nommer le
+producteur : IGN, DGFiP (DVF), ADEME, BRGM et les ministères derrière Géorisques, et les
+contributeurs du Géoportail de l'urbanisme.
