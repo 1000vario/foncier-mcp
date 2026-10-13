@@ -7,6 +7,7 @@ a typed error envelope in the wrappers.
 
 from __future__ import annotations
 
+import asyncio
 import inspect
 import re
 import time
@@ -25,6 +26,12 @@ YEAR_RE = re.compile(r"^20\d{2}$")
 MAX_RADIUS_M = 2000
 MAX_NEARBY = 200
 DPE_REVERSE_MAX_DISTANCE_M = 30.0
+# A point query on some Geoportail de l urbanisme layers returns whole polygons: in Lyon,
+# prescription-surf was measured at 45 s on 2026-10-13. Those layers get their own deadline so
+# the zone, which answers in under a second, still reaches the caller. The fetch keeps running
+# past the deadline and fills the cache for the next request.
+SLOW_LAYER_TIMEOUT_S = 25.0
+_LATE_FETCHES: set[asyncio.Future[Any]] = set()
 RADON_MEANING = {"1": "low potential", "2": "medium potential", "3": "high potential"}
 
 
@@ -403,6 +410,40 @@ def _easement_record(props: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _forget_late_fetch(task: asyncio.Future[Any]) -> None:
+    _LATE_FETCHES.discard(task)
+    if not task.cancelled():
+        task.exception()  # retrieved, so a late failure is not logged as unhandled
+
+
+async def _slow_layer(fetcher: Fetcher, endpoint: str, lon: float, lat: float) -> Any:
+    """Features and fetch result of a slow GPU layer, or the reason it is absent."""
+    task = asyncio.ensure_future(gpu.intersecting(fetcher, endpoint, lon, lat))
+    try:
+        return await asyncio.wait_for(asyncio.shield(task), SLOW_LAYER_TIMEOUT_S)
+    except TimeoutError:
+        _LATE_FETCHES.add(task)
+        task.add_done_callback(_forget_late_fetch)
+        return (
+            f"the Geoportail de l urbanisme did not answer within {SLOW_LAYER_TIMEOUT_S:.0f} s "
+            f"for {endpoint}; the answer is being cached, retry in a minute"
+        )
+    except FoncierError as exc:
+        return f"{endpoint} unavailable: {exc.message}"
+
+
+def _slow_layer_field(
+    found: Any, record: Callable[[dict[str, Any]], dict[str, Any]], result: ToolResult
+) -> dict[str, Any]:
+    if isinstance(found, str):
+        result.warnings.append(found)
+        return missing(gpu.SOURCE, found)
+    features, res = found
+    return sourced(
+        [record(f.get("properties") or {}) for f in features], gpu.SOURCE, res.fetched_at
+    )
+
+
 async def _zoning_for_subject(fetcher: Fetcher, subject: Subject) -> ToolResult:
     parcel = _require_parcel(subject)
     insee = parcel["code_insee"]
@@ -443,9 +484,14 @@ async def _zoning_for_subject(fetcher: Fetcher, subject: Subject) -> ToolResult:
         result.data["planning_document"] = missing(src, reason)
         result.data["zones"] = missing(src, reason)
         result.data["prescriptions"] = missing(src, reason)
+        easements = await _slow_layer(fetcher, "assiette-sup-s", lon, lat)
     else:
-        docs, docs_res = await gpu.intersecting(fetcher, "document", lon, lat)
-        zones, zones_res = await gpu.intersecting(fetcher, "zone-urba", lon, lat)
+        (docs, docs_res), (zones, zones_res), prescriptions, easements = await asyncio.gather(
+            gpu.intersecting(fetcher, "document", lon, lat),
+            gpu.intersecting(fetcher, "zone-urba", lon, lat),
+            _slow_layer(fetcher, "prescription-surf", lon, lat),
+            _slow_layer(fetcher, "assiette-sup-s", lon, lat),
+        )
         if docs:
             result.data["planning_document"] = sourced(
                 [_document_record(f.get("properties") or {}) for f in docs],
@@ -489,17 +535,11 @@ async def _zoning_for_subject(fetcher: Fetcher, subject: Subject) -> ToolResult:
                     "no zoning feature at this point on the Geoportail de l urbanisme: the "
                     "document may not be digitised, not yet published, or the point is outside it",
                 )
-        prescriptions, presc_res = await gpu.intersecting(fetcher, "prescription-surf", lon, lat)
-        result.data["prescriptions"] = sourced(
-            [_prescription_record(f.get("properties") or {}) for f in prescriptions],
-            src,
-            presc_res.fetched_at,
+        result.data["prescriptions"] = _slow_layer_field(
+            prescriptions, _prescription_record, result
         )
 
-    easements, ease_res = await gpu.intersecting(fetcher, "assiette-sup-s", lon, lat)
-    result.data["public_utility_easements"] = sourced(
-        [_easement_record(f.get("properties") or {}) for f in easements], src, ease_res.fetched_at
-    )
+    result.data["public_utility_easements"] = _slow_layer_field(easements, _easement_record, result)
     result.data["lookup_point"] = sourced({"lon": lon, "lat": lat}, "foncier_mcp", None)
     return result
 
@@ -839,13 +879,15 @@ async def summarize_parcel(
         ("energy_diagnostics", dpe.SOURCE, lambda: _dpe_for_subject(fetcher, subject)),
         ("risks", georisques.SOURCE, lambda: _risks_for_subject(fetcher, subject)),
     ]
-    for name, source, run in sections:
-        try:
-            part = await run()
-        except FoncierError as exc:
-            result.data[name] = missing(source, f"section unavailable: {exc.message}")
-            result.errors.append(exc.to_dict())
+    # The sections hit different hosts: run side by side, the slowest one sets the time.
+    parts = await asyncio.gather(*(run() for _, _, run in sections), return_exceptions=True)
+    for (name, source, _), part in zip(sections, parts, strict=True):
+        if isinstance(part, FoncierError):
+            result.data[name] = missing(source, f"section unavailable: {part.message}")
+            result.errors.append(part.to_dict())
             continue
+        if isinstance(part, BaseException):
+            raise part
         part.data.pop("parcel", None)
         result.data[name] = part.data
         result.warnings.extend(w for w in part.warnings if w not in result.warnings)
