@@ -17,6 +17,14 @@ File produced by `foncier-mcp keys export`. Its content becomes the secret varia
 FONCIER_MCP_KEYS_JSON. Without it an existing container keeps its current keys and a new one
 starts with none: every call then answers unauthorized.
 
+.PARAMETER NoDemo
+Turns off the public demo route POST /demo/summary (on by default, called by the form on
+guillaume-couillard.com/labs/foncier). The route needs no key and is capped per client and per
+day; its counters live in memory, so they are global only while MaxScale stays at 1.
+
+.PARAMETER DemoOrigins
+Comma-separated origins allowed to call the demo from a browser (CORS).
+
 .PARAMETER DryRun
 Read-only: shows what exists and what would be created or changed. No write on any provider.
 
@@ -37,6 +45,10 @@ param(
     [int]$MvCpu = 140,
     [int]$MaxScale = 1,
     [int]$FreeDailyQuota = 200,
+    [switch]$NoDemo,
+    [string]$DemoOrigins = 'https://guillaume-couillard.com',
+    [int]$DemoHourlyPerIp = 10,
+    [int]$DemoDailyCap = 300,
     [switch]$SkipDomain,
     [switch]$DryRun
 )
@@ -49,7 +61,7 @@ $ScwApi = "https://api.scaleway.com/containers/v1/regions/$Region"
 $CfApi = 'https://api.cloudflare.com/client/v4'
 $script:ScwHeaders = @{}
 $script:StopEarly = $false
-$Summary = [ordered]@{ hostname = $Hostname; region = $Region; image = $Image; dry_run = [bool]$DryRun }
+$Summary = [ordered]@{ hostname = $Hostname; region = $Region; image = $Image; dry_run = [bool]$DryRun; demo = -not $NoDemo }
 
 function Step([string]$Text) { Write-Host ('== ' + $Text) -ForegroundColor Cyan }
 function Note([string]$Text) { Write-Host ('   ' + $Text) }
@@ -168,7 +180,7 @@ function Set-CloudflareCname([string]$Name, [string]$Target, $CfRecord) {
 function Test-Health([string]$Base, [string]$Label) {
     try {
         $health = Invoke-RestMethod -Uri ($Base.TrimEnd('/') + '/health') -TimeoutSec 120
-        Note "$Label /health: $($health.status), version $($health.version), paid tier $($health.paid_tier_enabled)"
+        Note "$Label /health: $($health.status), version $($health.version), paid tier $($health.paid_tier_enabled), demo $($health.demo_enabled)"
         return $health.status
     } catch {
         Note "$Label /health not answering: $($_.Exception.Message)"
@@ -263,6 +275,10 @@ try {
         FONCIER_MCP_REQUIRE_API_KEY = '1'
         PAID_TIER_ENABLED = 'false'
         FONCIER_MCP_FREE_DAILY_QUOTA = "$FreeDailyQuota"
+        FONCIER_MCP_DEMO = $(if ($NoDemo) { '0' } else { '1' })
+        FONCIER_MCP_DEMO_ORIGINS = $DemoOrigins
+        FONCIER_MCP_DEMO_HOURLY_PER_IP = "$DemoHourlyPerIp"
+        FONCIER_MCP_DEMO_DAILY_CAP = "$DemoDailyCap"
     }
     $spec = [ordered]@{
         image = $Image; port = 8080

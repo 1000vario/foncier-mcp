@@ -320,6 +320,27 @@ Un hôte sans disque persistant reçoit ses clés par `FONCIER_MCP_KEYS_JSON`, l
 seule : `issue` et `revoke` refusent, et une révocation est un export suivi d'un redéploiement.
 L'export contient des empreintes et des courriels, jamais une clé.
 
+### Démo sans clé
+
+Pour qui n'utilise pas de client MCP, le service hébergé ouvre une seule route sans clé, appelée par
+le formulaire de [guillaume-couillard.com/labs/foncier](https://guillaume-couillard.com/labs/foncier) :
+
+```bash
+curl -X POST https://foncier.guillaume-couillard.com/demo/summary \
+  -H "Content-Type: application/json" -d '{"address": "1 Place de la Comédie 69001 Lyon"}'
+```
+
+- Elle n'appelle que `summarize_parcel`, rayon de 200 m fixé, et ne garde que les 15 ventes les
+  plus proches (un avertissement le dit ; l'outil MCP en rend jusqu'à 200).
+- Limites en mémoire : 10 requêtes par heure et par adresse IP, 300 par jour UTC pour tous, 3 en
+  cours au plus. L'en-tête `X-Forwarded-For` se falsifie, si bien que le plafond journalier est la
+  vraie protection ; il tient parce que le conteneur ne monte jamais au-delà d'une instance.
+- CORS limité aux origines de `FONCIER_MCP_DEMO_ORIGINS` ; une autre origine reçoit un 403.
+- L'adresse voyage dans le corps de la requête, jamais dans l'URL, et n'est pas journalisée. Les
+  réponses portent `Cache-Control: no-store` et `X-Robots-Tag: noindex` : les fiches se produisent
+  à la demande et ne deviennent pas des pages indexées.
+- Éteinte par défaut (`FONCIER_MCP_DEMO=0`). `deploy.ps1` l'allume ; `-NoDemo` la coupe.
+
 ## Lancer le serveur HTTP
 
 ```bash
@@ -338,6 +359,9 @@ Environnement (voir [.env.example](.env.example)) :
 | `FONCIER_MCP_KEYS_JSON` | vide | sortie de `keys export` pour un hôte sans disque ; quand elle est posée, le magasin de clés est en lecture seule et `FONCIER_MCP_KEYS_FILE` est ignoré |
 | `FONCIER_MCP_FREE_DAILY_QUOTA` | `200` | quota du niveau gratuit |
 | `PAID_TIER_ENABLED` | `false` | interrupteur du niveau payant, voir plus haut |
+| `FONCIER_MCP_DEMO` | `0` | `1` ouvre la route sans clé `POST /demo/summary`, voir plus haut |
+| `FONCIER_MCP_DEMO_ORIGINS` | `https://guillaume-couillard.com` | origines autorisées à l'appeler depuis un navigateur, séparées par des virgules |
+| `FONCIER_MCP_DEMO_HOURLY_PER_IP`, `FONCIER_MCP_DEMO_DAILY_CAP` | `10`, `300` | limites de la démo |
 | `FONCIER_MCP_ALLOWED_HOSTS` | vide | hôtes acceptés, séparés par des virgules, contre le DNS rebinding ; vide accepte tout hôte, ce qu'un déploiement derrière un mandataire exige |
 
 ### Conteneur
@@ -385,7 +409,8 @@ foncier-mcp keys export > keys-export.json
 
 `deploy.ps1` crée ou met à jour l'espace de noms et le conteneur (port 8080, 256 Mo, 140 mvCPU,
 min 0, max 1, public, `FONCIER_MCP_REQUIRE_API_KEY=1`, `PAID_TIER_ENABLED=false`,
-`FONCIER_MCP_KEYS_JSON` en variable secrète ; `FONCIER_MCP_ALLOWED_HOSTS` reste vide parce que la
+`FONCIER_MCP_KEYS_JSON` en variable secrète, démo allumée sauf `-NoDemo`, origines réglables par
+`-DemoOrigins` ; `FONCIER_MCP_ALLOWED_HOSTS` reste vide parce que la
 protection contre le DNS rebinding vise un serveur local, pas un point d'entrée public derrière le
 mandataire de l'hébergeur), attend l'état `ready`, contrôle `/health` sur le point d'entrée
 Scaleway, s'assure que le CNAME `foncier.guillaume-couillard.com` pointe vers ce point d'entrée

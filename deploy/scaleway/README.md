@@ -49,8 +49,10 @@ foncier-mcp keys export > keys-export.json        # hashes and emails only, no k
 2. Finds or creates the namespace, then the container: image above, port 8080, 256 MB and
    140 mvCPU (the console pairing for that memory), `min_scale` 0, `max_scale` 1, public,
    environment `FONCIER_MCP_REQUIRE_API_KEY=1`, `PAID_TIER_ENABLED=false`,
-   `FONCIER_MCP_FREE_DAILY_QUOTA=200`, secret environment `FONCIER_MCP_KEYS_JSON` from the
-   export file.
+   `FONCIER_MCP_FREE_DAILY_QUOTA=200`, the key-less demo (`FONCIER_MCP_DEMO=1`,
+   `FONCIER_MCP_DEMO_ORIGINS`, `FONCIER_MCP_DEMO_HOURLY_PER_IP=10`,
+   `FONCIER_MCP_DEMO_DAILY_CAP=300`; `-NoDemo` sets `FONCIER_MCP_DEMO=0`), secret environment
+   `FONCIER_MCP_KEYS_JSON` from the export file.
    On an existing container it updates image, limits, variables and redeploys.
    HTTPS connections only is set at creation; on an existing container it is read back and
    switched on when off, so plain HTTP is redirected to HTTPS.
@@ -74,7 +76,9 @@ Nothing printed is secret: identifiers, statuses, hostnames.
 2. Deploy container: external registry, image `ghcr.io/1000vario/foncier-mcp:latest`, port 8080,
    256 MB with 140 mvCPU, min scale 0, max scale 1, public, timeout default.
 3. Environment variables: `FONCIER_MCP_REQUIRE_API_KEY=1`, `PAID_TIER_ENABLED=false`,
-   `FONCIER_MCP_FREE_DAILY_QUOTA=200`.
+   `FONCIER_MCP_FREE_DAILY_QUOTA=200`, `FONCIER_MCP_DEMO=1`,
+   `FONCIER_MCP_DEMO_ORIGINS=https://guillaume-couillard.com`,
+   `FONCIER_MCP_DEMO_HOURLY_PER_IP=10`, `FONCIER_MCP_DEMO_DAILY_CAP=300`.
    Secret: `FONCIER_MCP_KEYS_JSON` = the content of `keys-export.json`.
 4. Container, Security tab, HTTPS connections only: on.
    Wait for Ready, open `<default endpoint>/health`.

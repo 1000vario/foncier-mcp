@@ -1,7 +1,8 @@
 """MCP wiring: one MCPServer exposing the tools over stdio or streamable HTTP.
 
 Tool logic lives in tools.py. This module registers the signatures and descriptions the
-agent sees, applies the API-key guard to HTTP callers and serves /health.
+agent sees, applies the API-key guard to HTTP callers and serves /health, plus the optional
+public demo route (demo.py).
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from starlette.responses import JSONResponse, Response
 
 from . import __version__
 from .config import Settings
+from .demo import DEMO_PATH, DemoEndpoint
 from .errors import FeatureDisabled, FoncierError
 from .http import Fetcher
 from .models import error_envelope
@@ -285,6 +287,7 @@ class FoncierServer:
                     "version": __version__,
                     "mcp_endpoint": MCP_PATH,
                     "paid_tier_enabled": settings.paid_tier_enabled,
+                    "demo_enabled": settings.demo_enabled,
                 }
             )
 
@@ -299,6 +302,19 @@ class FoncierServer:
                     "auth": "x-api-key header, free key on request (see README)",
                 }
             )
+
+        if not settings.demo_enabled:
+            return
+        demo = DemoEndpoint(settings, self.fetcher)
+        self.demo = demo
+
+        @self.mcp.custom_route(DEMO_PATH, methods=["POST"])
+        async def demo_summary(request: Request) -> Response:
+            return await demo.summary(request)
+
+        @self.mcp.custom_route(DEMO_PATH, methods=["OPTIONS"])
+        async def demo_preflight(request: Request) -> Response:
+            return await demo.preflight(request)
 
     # ------------------------------------------------------------------ running
 

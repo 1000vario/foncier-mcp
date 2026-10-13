@@ -53,6 +53,10 @@ class Settings:
     keys_json: str | None = None
     timeout_seconds: float = 30.0
     user_agent: str = "foncier-mcp/0.1 (+https://github.com/1000vario/foncier-mcp)"
+    demo_enabled: bool = False
+    demo_origins: tuple[str, ...] = ("https://guillaume-couillard.com",)
+    demo_hourly_per_ip: int = 10
+    demo_daily_cap: int = 300
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -68,4 +72,9 @@ class Settings:
             paid_tier_enabled=_env_bool("PAID_TIER_ENABLED", False),
             allowed_hosts=_env_list("FONCIER_MCP_ALLOWED_HOSTS"),
             keys_json=_env_text("FONCIER_MCP_KEYS_JSON"),
+            demo_enabled=_env_bool("FONCIER_MCP_DEMO", False),
+            demo_origins=_env_list("FONCIER_MCP_DEMO_ORIGINS")
+            or ("https://guillaume-couillard.com",),
+            demo_hourly_per_ip=_env_int("FONCIER_MCP_DEMO_HOURLY_PER_IP", 10),
+            demo_daily_cap=_env_int("FONCIER_MCP_DEMO_DAILY_CAP", 300),
         )

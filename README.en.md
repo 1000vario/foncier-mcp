@@ -314,6 +314,28 @@ A host without a persistent disk gets its keys through `FONCIER_MCP_KEYS_JSON`, 
 `revoke` refuse, and a revocation is an export followed by a redeploy. The export holds hashes
 and emails, never a key.
 
+### Key-less demo
+
+For people who do not use an MCP client, the hosted service opens one key-less route, called by the
+form at [guillaume-couillard.com/labs/foncier](https://guillaume-couillard.com/labs/foncier) (a
+French page):
+
+```bash
+curl -X POST https://foncier.guillaume-couillard.com/demo/summary \
+  -H "Content-Type: application/json" -d '{"address": "1 Place de la Comédie 69001 Lyon"}'
+```
+
+- It only calls `summarize_parcel`, with a fixed 200 m radius, and keeps the 15 nearest sales (a
+  warning says so; the MCP tool returns up to 200).
+- In-memory limits: 10 requests per hour per IP address, 300 per UTC day for everyone, 3 in flight
+  at most. The `X-Forwarded-For` header can be forged, so the daily cap is the real protection; it
+  holds because the container never scales past one instance.
+- CORS is limited to the origins in `FONCIER_MCP_DEMO_ORIGINS`; any other origin gets a 403.
+- The address travels in the request body, never in the URL, and is not logged. Responses carry
+  `Cache-Control: no-store` and `X-Robots-Tag: noindex`: cards are produced on demand and never
+  become indexed pages.
+- Off by default (`FONCIER_MCP_DEMO=0`). `deploy.ps1` turns it on; `-NoDemo` turns it off.
+
 ## Running the HTTP server
 
 ```bash
@@ -332,6 +354,9 @@ Environment (see [.env.example](.env.example)):
 | `FONCIER_MCP_KEYS_JSON` | empty | output of `keys export` for a host without a disk; when set the key store is read-only and `FONCIER_MCP_KEYS_FILE` is ignored |
 | `FONCIER_MCP_FREE_DAILY_QUOTA` | `200` | free tier quota |
 | `PAID_TIER_ENABLED` | `false` | paid tier switch, see above |
+| `FONCIER_MCP_DEMO` | `0` | `1` opens the key-less route `POST /demo/summary`, see above |
+| `FONCIER_MCP_DEMO_ORIGINS` | `https://guillaume-couillard.com` | comma-separated origins allowed to call it from a browser |
+| `FONCIER_MCP_DEMO_HOURLY_PER_IP`, `FONCIER_MCP_DEMO_DAILY_CAP` | `10`, `300` | demo limits |
 | `FONCIER_MCP_ALLOWED_HOSTS` | empty | comma-separated hosts for DNS-rebinding protection; empty accepts any host, which a deployment behind a proxy needs |
 
 ### Container
@@ -379,7 +404,8 @@ foncier-mcp keys export > keys-export.json
 
 `deploy.ps1` creates or updates the namespace and the container (port 8080, 256 MB, 140 mvCPU,
 min 0, max 1, public, `FONCIER_MCP_REQUIRE_API_KEY=1`, `PAID_TIER_ENABLED=false`,
-`FONCIER_MCP_KEYS_JSON` as a secret variable; `FONCIER_MCP_ALLOWED_HOSTS` stays empty because DNS
+`FONCIER_MCP_KEYS_JSON` as a secret variable, demo on unless `-NoDemo`, origins set by
+`-DemoOrigins`; `FONCIER_MCP_ALLOWED_HOSTS` stays empty because DNS
 rebinding protection guards local servers, not a public endpoint behind the provider's proxy),
 waits for `ready`, checks `/health` on the Scaleway endpoint, makes sure the CNAME
 `foncier.guillaume-couillard.com` points at that endpoint without proxy so that the HTTP-01
