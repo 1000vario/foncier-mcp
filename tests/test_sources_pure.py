@@ -150,6 +150,17 @@ def test_rows_for_parcel_and_within():
     assert len(near) == 1 and near[0][1] < 1
 
 
+def test_near_or_on_keeps_the_parcel_and_the_radius_only():
+    on = _row(id_parcelle="34172000AB0001", longitude="3.99", latitude="43.70")
+    near = _row(id_parcelle="34172000AB0002", longitude="3.8805", latitude="43.6105")
+    far = _row(id_parcelle="34172000AB0003", longitude="3.90", latitude="43.61")
+    blank = _row(id_parcelle="34172000AB0004", longitude="", latitude="")
+    keep = dvf.near_or_on("34172000AB0001", 3.88, 43.61, 200)
+    assert [keep(r) for r in (on, near, far, blank)] == [True, True, False, False]
+    only_parcel = dvf.near_or_on("34172000AB0001", None, None, 200)
+    assert [only_parcel(r) for r in (on, near)] == [True, False]
+
+
 def _square_around(lon, lat, half_m):
     import json
 

@@ -10,10 +10,12 @@ DVF does not cover Alsace-Moselle (57, 67, 68), which keep the Livre foncier, no
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import math
 from collections import defaultdict
+from collections.abc import Callable
 from typing import Any
 
 from ..http import Fetcher, FetchResult
@@ -49,11 +51,56 @@ def haversine_m(lon1: float, lat1: float, lon2: float, lat2: float) -> float:
     return 2 * r * math.asin(math.sqrt(a))
 
 
-async def commune_rows(
-    fetcher: Fetcher, insee: str, years: tuple[str, ...] = DEFAULT_YEARS
-) -> tuple[list[dict[str, str]], dict[str, dict[str, Any]]]:
-    """All DVF rows for a commune over the given years, plus per-year file metadata.
+def _parse(
+    text: str, keep: Callable[[dict[str, str]], bool] | None
+) -> tuple[list[dict[str, str]], int]:
+    kept: list[dict[str, str]] = []
+    count = 0
+    for row in csv.DictReader(io.StringIO(text)):
+        count += 1
+        if keep is None or keep(row):
+            kept.append(row)
+    return kept, count
 
+
+def near_or_on(
+    parcel_id: str | None, lon: float | None, lat: float | None, radius_m: float
+) -> Callable[[dict[str, str]], bool]:
+    """Row filter: the parcel itself, or a geolocated row within radius_m of (lon, lat).
+
+    A large commune holds tens of thousands of rows a year (Nantes, 79 000 over five years,
+    about 150 MB as dicts); keeping them all does not fit a 256 MB container. A degree box
+    rejects most rows before the haversine.
+    """
+    use_radius = lon is not None and lat is not None and radius_m > 0
+    dlat = dlon = 0.0
+    if use_radius:
+        dlat = radius_m / 111_000 * 1.1
+        dlon = dlat / max(math.cos(math.radians(lat)), 0.01)
+
+    def keep(row: dict[str, str]) -> bool:
+        if parcel_id and row.get("id_parcelle") == parcel_id:
+            return True
+        if not use_radius:
+            return False
+        rlon, rlat = _num(row.get("longitude")), _num(row.get("latitude"))
+        if rlon is None or rlat is None or abs(rlat - lat) > dlat or abs(rlon - lon) > dlon:
+            return False
+        return haversine_m(lon, lat, rlon, rlat) <= radius_m
+
+    return keep
+
+
+async def commune_rows(
+    fetcher: Fetcher,
+    insee: str,
+    years: tuple[str, ...] = DEFAULT_YEARS,
+    keep: Callable[[dict[str, str]], bool] | None = None,
+) -> tuple[list[dict[str, str]], dict[str, dict[str, Any]]]:
+    """DVF rows for a commune over the given years, plus per-year file metadata.
+
+    With keep, only the rows it accepts are returned; the per-year count stays the file's.
+    Each file is parsed in a thread so the event loop, and its timeouts, keep running.
     A year with no file (HTTP 404) is recorded as absent, not as an error: small communes
     without any sale in a year have no file.
     """
@@ -67,11 +114,8 @@ async def commune_rows(
         if result.status >= 400:
             files[year] = {"status": f"http_{result.status}", "fetched_at": result.fetched_at}
             continue
-        reader = csv.DictReader(io.StringIO(result.text))
-        count = 0
-        for row in reader:
-            rows.append(row)
-            count += 1
+        kept, count = await asyncio.to_thread(_parse, result.text, keep)
+        rows.extend(kept)
         files[year] = {
             "status": "ok",
             "rows": count,

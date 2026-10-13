@@ -293,7 +293,9 @@ async def _sales_for_subject(
         result.errors.append(NotCovered(reason, source=dvf.SOURCE).to_dict())
         return result
 
-    rows, files = await dvf.commune_rows(fetcher, insee, years)
+    center = parcel.get("centroid") or {}
+    keep = dvf.near_or_on(parcel["id"], center.get("lon"), center.get("lat"), radius_m)
+    rows, files = await dvf.commune_rows(fetcher, insee, years, keep)
     ok_files = {y: f for y, f in files.items() if f["status"] == "ok"}
     failed = {y: f for y, f in files.items() if f["status"].startswith("http_")}
     retrieved_at = max((f["fetched_at"] for f in files.values()), default=None)
