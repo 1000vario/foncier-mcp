@@ -15,7 +15,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from .errors import FoncierError, InvalidInput, NotCovered, NotFound
+from .errors import FoncierError, InvalidInput, NotCovered, NotFound, SourceUnavailable
 from .http import Fetcher
 from .models import envelope, error_envelope, missing, sourced
 from .sources import cadastre, dpe, dvf, geocode, georisques, gpu
@@ -31,6 +31,8 @@ DPE_REVERSE_MAX_DISTANCE_M = 30.0
 # the zone, which answers in under a second, still reaches the caller. The fetch keeps running
 # past the deadline and fills the cache for the next request.
 SLOW_LAYER_TIMEOUT_S = 25.0
+# Each summarize_parcel section, under the demo's 60 s ceiling once geocoding and cadastre are in.
+SECTION_TIMEOUT_S = 35.0
 _LATE_FETCHES: set[asyncio.Future[Any]] = set()
 RADON_MEANING = {"1": "low potential", "2": "medium potential", "3": "high potential"}
 
@@ -851,6 +853,24 @@ async def _dpe_for_subject(fetcher: Fetcher, subject: Subject) -> ToolResult:
     return result
 
 
+class SourceTimeout(SourceUnavailable):
+    """A summary section that did not answer in time; the others are still returned."""
+
+
+async def _section_within(run: Callable[[], Awaitable[ToolResult]], source: str) -> ToolResult:
+    task = asyncio.ensure_future(run())
+    try:
+        return await asyncio.wait_for(asyncio.shield(task), SECTION_TIMEOUT_S)
+    except TimeoutError:
+        _LATE_FETCHES.add(task)
+        task.add_done_callback(_forget_late_fetch)
+        raise SourceTimeout(
+            f"{source} did not answer within {SECTION_TIMEOUT_S:.0f} s; "
+            "the answer is being cached, retry in a minute",
+            source=source,
+        ) from None
+
+
 async def summarize_parcel(
     fetcher: Fetcher,
     parcel_id: str | None = None,
@@ -881,9 +901,17 @@ async def summarize_parcel(
         ("energy_diagnostics", dpe.SOURCE, lambda: _dpe_for_subject(fetcher, subject)),
         ("risks", georisques.SOURCE, lambda: _risks_for_subject(fetcher, subject)),
     ]
-    # The sections hit different hosts: run side by side, the slowest one sets the time.
-    parts = await asyncio.gather(*(run() for _, _, run in sections), return_exceptions=True)
+    # The sections hit different hosts: run side by side, the slowest one sets the time, up to
+    # SECTION_TIMEOUT_S. A late section is reported missing and keeps running to fill the cache,
+    # so the caller still gets every section that answered.
+    parts = await asyncio.gather(
+        *(_section_within(run, source) for _, source, run in sections), return_exceptions=True
+    )
     for (name, source, _), part in zip(sections, parts, strict=True):
+        if isinstance(part, SourceTimeout):
+            result.data[name] = missing(source, part.message)
+            result.errors.append(part.to_dict())
+            continue
         if isinstance(part, FoncierError):
             result.data[name] = missing(source, f"section unavailable: {part.message}")
             result.errors.append(part.to_dict())
